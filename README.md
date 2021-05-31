@@ -1,2 +1,2 @@
 # RandomSideProjects
-A collection of stuff I do over the weekend to keep my skills sharp
+Several years ago I decided that I'd do some side projects every once in a while just to keep my skills sharp. None of these are fully fleshed out, the point was to learn something new, or challenge me to think about something. At some point it occurred to me it might be a good idea just to have that up on GitHub. If you're wondering what kinds of projects you can take on to brush up on your skills some of these might be fun for you to implement.
