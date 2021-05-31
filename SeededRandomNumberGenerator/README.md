@@ -1,0 +1,2 @@
+## SeededRandomNumberGenerator
+You know for what it's worth there's a seeded random number generator that comes with GameKit, but Apple is also really picky about linking to things that you don't necessarily need. The problem is that as a big believer in TDD I want to test things, and randomness is hard to test. This repo represents a seeded random number generator to include in projects where you want to have deterministic randomness for testing purposes.
