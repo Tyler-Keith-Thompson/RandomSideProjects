@@ -47,15 +47,6 @@
         }
       },
       {
-        "package": "fluent-postgres-driver",
-        "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
-        "state": {
-          "branch": null,
-          "revision": "11d4fce0c5d8a027a5d131439c9c94dd3230cb8e",
-          "version": "2.1.2"
-        }
-      },
-      {
         "package": "fluent-sqlite-driver",
         "repositoryURL": "https://github.com/vapor/fluent-sqlite-driver.git",
         "state": {
@@ -65,7 +56,7 @@
         }
       },
       {
-        "package": "graphiql-vapor",
+        "package": "GraphiQLVapor",
         "repositoryURL": "https://github.com/alexsteinerde/graphiql-vapor.git",
         "state": {
           "branch": null,
@@ -92,7 +83,7 @@
         }
       },
       {
-        "package": "graphql-kit",
+        "package": "GraphQLKit",
         "repositoryURL": "https://github.com/alexsteinerde/graphql-kit.git",
         "state": {
           "branch": null,
@@ -107,24 +98,6 @@
           "branch": null,
           "revision": "c9ea04017b7fb3b1f034ad7a77f8e53d3e080be5",
           "version": "4.2.1"
-        }
-      },
-      {
-        "package": "postgres-kit",
-        "repositoryURL": "https://github.com/vapor/postgres-kit.git",
-        "state": {
-          "branch": null,
-          "revision": "13f6c735cf9a9053011d03e77e2a81802ad6c680",
-          "version": "2.3.0"
-        }
-      },
-      {
-        "package": "postgres-nio",
-        "repositoryURL": "https://github.com/vapor/postgres-nio.git",
-        "state": {
-          "branch": null,
-          "revision": "33eea144f465a48b17f4c63573c40d33824fdde4",
-          "version": "1.5.2"
         }
       },
       {

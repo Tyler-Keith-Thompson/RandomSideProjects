@@ -34,10 +34,13 @@ final class TodoResolver {
         let id: UUID
     }
 
-    func deleteTodo(request: Request, arguments: DeleteTodoArguments) throws -> EventLoopFuture<Bool> {
+    func deleteTodo(request: Request, arguments: DeleteTodoArguments) throws -> EventLoopFuture<Todo> {
         Todo.find(arguments.id, on: request.db)
             .unwrap(or: Abort(.notFound))
-            .flatMap({ $0.delete(on: request.db) })
-            .transform(to: true)
+            .flatMap { todo in
+                todo.delete(on: request.db).flatMap {
+                    request.eventLoop.makeCompletedFuture(.success(todo))
+                }
+            }
     }
 }

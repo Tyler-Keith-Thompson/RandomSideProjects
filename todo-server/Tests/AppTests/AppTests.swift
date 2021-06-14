@@ -99,4 +99,29 @@ final class AppTests: XCTestCase {
             XCTAssertEqual(createdTodo.title, foundTodoInDB?.title)
         }
     }
+
+    func testDeletingATodo() throws {
+        let app = try Application.forTesting
+        defer { app.shutdown() }
+
+        let expectedTodo = Todo(id: UUID(), title: UUID().uuidString)
+        try expectedTodo.save(on: try XCTUnwrap(app.db(.sqlite))).wait()
+
+        try app.sendGraphBody("""
+            mutation DeleteTodo {
+              deleteTodo(id: "\(try XCTUnwrap(expectedTodo.id))") {
+                id,
+                title
+              }
+            }
+            """) { res in
+            XCTAssertEqual(res.status, .ok)
+
+            let deletedTodo = try res.content.decode(Todo.self, using: GraphQLContentDecoder(queryName: "deleteTodo"))
+
+            XCTAssertNil(try Todo.find(expectedTodo.id, on: app.db).wait())
+            XCTAssertEqual(deletedTodo.id, expectedTodo.id)
+            XCTAssertEqual(deletedTodo.title, expectedTodo.title)
+        }
+    }
 }
