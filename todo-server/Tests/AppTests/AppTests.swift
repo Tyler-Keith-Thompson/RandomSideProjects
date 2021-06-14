@@ -124,4 +124,26 @@ final class AppTests: XCTestCase {
             XCTAssertEqual(deletedTodo.title, expectedTodo.title)
         }
     }
+
+    func testDeletingSingleTodo_ReturnsNotFound_WhenTodoIDInvalid() throws {
+        let app = try Application.forTesting
+        defer { app.shutdown() }
+
+        try app.sendGraphBody("""
+            mutation DeleteTodo {
+              deleteTodo(id: "\(UUID())") {
+                id,
+                title
+              }
+            }
+            """) { res in
+            XCTAssertEqual(res.status, .ok)
+
+            let errors = try JSONDecoder().decode([GraphQLError].self, from: res.body.extractingJSONContainer(named: "errors"))
+
+            XCTAssertEqual(errors.count, 1)
+            XCTAssertEqual(errors.first?.message, "Abort.404: Not Found")
+            XCTAssertEqual(errors.first?.path, ["deleteTodo"])
+        }
+    }
 }
