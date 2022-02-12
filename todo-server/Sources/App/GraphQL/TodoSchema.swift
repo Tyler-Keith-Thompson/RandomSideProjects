@@ -16,7 +16,7 @@ enum Schemas {
             try Schema<TodoResolver, Request> {
                 Scalar(UUID.self)
 
-                // Todo type with it's fields
+                // Todo type with its fields
                 Type(Todo.self) {
                     Field("id", at: \.id)
                     Field("title", at: \.title)
