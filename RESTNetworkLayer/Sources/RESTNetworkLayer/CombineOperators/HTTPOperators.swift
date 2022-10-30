@@ -26,16 +26,16 @@ extension Publisher {
 
     public func respondToRateLimiting(maxSecondsToWait: Double = 1) -> AnyPublisher<Output, Failure> where Output == RESTAPIProtocol.Output, Failure == Error {
         tryCatch(HTTPClientError.tooManyRequests()) { err -> AnyPublisher<Output, Failure> in
-            if case .tooManyRequests(let retryAfter) = err {
-                let delayInSeconds = retryAfter?.converted(to: .seconds).value ?? maxSecondsToWait
-
-                return self.delay(for: .seconds(delayInSeconds),
-                                  scheduler: DispatchQueue.global(qos:.userInitiated),
-                                  options: nil)
-                .eraseToAnyPublisher()
-            } else {
+            guard case .tooManyRequests(let retryAfter) = err else {
                 throw err // shouldn't ever really happen
             }
+
+            let delayInSeconds = retryAfter?.converted(to: .seconds).value ?? maxSecondsToWait
+
+            return self.delay(for: .seconds(delayInSeconds),
+                              scheduler: DispatchQueue.global(qos:.userInitiated),
+                              options: nil)
+            .eraseToAnyPublisher()
         }
         .eraseToAnyPublisher()
     }
