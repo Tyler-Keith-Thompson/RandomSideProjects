@@ -43,8 +43,9 @@ public enum HTTPClientError: HTTPError, CaseIterable {
     public init?(code: UInt) {
         if let errorForCode = Self.allCases.first(where: { $0.statusCode == code }) {
             self = errorForCode
+        } else {
+            return nil
         }
-        return nil
     }
 
     case badRequest
