@@ -15,6 +15,10 @@ import OHHTTPStubsSwift
 import RESTNetworkLayer
 
 final class HTTPOperatorsTests: XCTestCase {
+    struct JSONPlaceholder: RESTAPIProtocol {
+        var baseURL: String = "https://jsonplaceholder.typicode.com"
+    }
+
     override func setUpWithError() throws {
         HTTPStubs.removeAllStubs()
 
@@ -84,5 +88,86 @@ final class HTTPOperatorsTests: XCTestCase {
         } else {
             XCTFail("RetryAfter value not in error.")
         }
+    }
+
+    func testRetryAfterServerSpecifiedTime() async throws {
+        let json = try XCTUnwrap("""
+        [
+            {
+                userId: 1,
+                id: 1,
+                title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+                body: "quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est autem sunt rem eveniet architecto"
+            },
+        ]
+        """.data(using: .utf8))
+        let retryAfter = Double.random(in: 0.100...0.300)
+        let requestDate: Date = Date()
+        StubResponse(on: isAbsoluteURLString("https://jsonplaceholder.typicode.com/posts") && isMethodGET()) { _ in
+            HTTPStubsResponse(data: Data(), statusCode: Int32(HTTPClientError.tooManyRequests().statusCode), headers: ["Retry-After": "\(retryAfter)"])
+        }
+        .thenRespond(on: isAbsoluteURLString("https://jsonplaceholder.typicode.com/posts") && isMethodGET()) { _ in
+            HTTPStubsResponse(data: json, statusCode: 200, headers: nil)
+        }
+
+        let api = JSONPlaceholder()
+
+        let value = try await api.get(endpoint: "posts")
+            .catchHTTPErrors()
+            .respondToRateLimiting()
+            .firstValue()
+            .get()
+
+        XCTAssertGreaterThan(Date().timeIntervalSince1970 - requestDate.timeIntervalSince1970, Measurement(value: retryAfter, unit: UnitDuration.milliseconds).converted(to: .seconds).value)
+        XCTAssertEqual(value.response.statusCode, 200)
+        XCTAssertEqual(String(data: value.data, encoding: .utf8), String(data: json, encoding: .utf8))
+    }
+
+    func testRateLimitingShouldDoNothingUnlessCorrectStatusCodeIsGiven() async throws {
+        let json = try XCTUnwrap("""
+        [
+            {
+                userId: 1,
+                id: 1,
+                title: "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+                body: "quia et suscipit suscipit recusandae consequuntur expedita et cum reprehenderit molestiae ut ut quas totam nostrum rerum est autem sunt rem eveniet architecto"
+            },
+        ]
+        """.data(using: .utf8))
+        StubResponse(on: isAbsoluteURLString("https://jsonplaceholder.typicode.com/posts") && isMethodGET()) { _ in
+            HTTPStubsResponse(data: json, statusCode: 200, headers: nil)
+        }
+
+        let api = JSONPlaceholder()
+
+        let value = try await api.get(endpoint: "posts")
+            .catchHTTPErrors()
+            .respondToRateLimiting()
+            .firstValue()
+            .get()
+
+        XCTAssertEqual(value.response.statusCode, 200)
+        XCTAssertEqual(String(data: value.data, encoding: .utf8), String(data: json, encoding: .utf8))
+    }
+
+    func testRateLimitingDoesNotRetryIfADifferentErrorIsThrown() async throws {
+        var requestCount = 0
+        StubResponse(on: isAbsoluteURLString("https://jsonplaceholder.typicode.com/posts") && isMethodGET()) { _ in
+            requestCount += 1
+            return HTTPStubsResponse(data: Data(), statusCode: 401, headers: nil)
+        }
+
+        let api = JSONPlaceholder()
+
+        let result = await api.get(endpoint: "posts")
+            .catchHTTPErrors()
+            .respondToRateLimiting()
+            .firstValue()
+
+        XCTAssertThrowsError(try result.get()) {
+            XCTAssertEqual($0 as? HTTPClientError, .unauthorized)
+        }
+
+        XCTAssertEqual(requestCount, 1)
     }
 }

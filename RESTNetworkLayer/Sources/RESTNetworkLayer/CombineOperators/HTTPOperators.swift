@@ -23,34 +23,20 @@ extension Publisher {
             throw err
         }
     }
-//    func catchStatus(_ status: UInt, andThrow errorHandler: @escaping (HTTPURLResponse) -> Error) -> Publishers.TryMap<Self, Output> {
-//        tryMap {
-//            guard $0.response.statusCode == status else {
-//                return (data: $0.data, response: $0.response)
-//            }
-//
-//            throw errorHandler($0.response)
-//        }
-//    }
-//
-//    func `catch`<E: HTTPError>(_ httpError: E) -> Publishers.TryMap<Self, Output> {
-//        catchStatus(httpError.httpStatusCode) { _ in httpError }
-//    }
-//
-//    func respondToRateLimiting(tolerance: Int = 50) -> AnyPublisher<Output, Failure> {
-//        catchStatus(API.ClientError.tooManyRequests.httpStatusCode) { API.ClientError.tooManyRequests(retryAfter: $0.retryAfter) }
-//            .tryCatch(API.ClientError.self) { err -> AnyPublisher<Output, Failure> in
-//                guard case .tooManyRequests(.some(let retryAfter)) = err else {
-//                    throw err
-//                }
-//
-//                return self.delay(for: .seconds(retryAfter.converted(to: .seconds).value),
-//                                  tolerance: .milliseconds(tolerance),
-//                                  scheduler: DispatchQueue.global(qos: .userInitiated),
-//                                  options: nil)
-//                .retryOn(API.ClientError.tooManyRequests)
-//                .eraseToAnyPublisher()
-//            }
-//            .eraseToAnyPublisher()
-//    }
+
+    public func respondToRateLimiting(maxSecondsToWait: Double = 1) -> AnyPublisher<Output, Failure> where Output == RESTAPIProtocol.Output, Failure == Error {
+        tryCatch(HTTPClientError.tooManyRequests()) { err -> AnyPublisher<Output, Failure> in
+            if case .tooManyRequests(let retryAfter) = err {
+                let delayInSeconds = retryAfter?.converted(to: .seconds).value ?? maxSecondsToWait
+
+                return self.delay(for: .seconds(delayInSeconds),
+                                  scheduler: DispatchQueue.global(qos:.userInitiated),
+                                  options: nil)
+                .eraseToAnyPublisher()
+            } else {
+                throw err // shouldn't ever really happen
+            }
+        }
+        .eraseToAnyPublisher()
+    }
 }

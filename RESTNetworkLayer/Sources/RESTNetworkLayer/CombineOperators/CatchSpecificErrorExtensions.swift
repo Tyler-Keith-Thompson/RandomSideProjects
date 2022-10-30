@@ -15,7 +15,7 @@ extension Publisher {
         tryCatch { err in
             guard let unwrappedError = (err as? E),
                     unwrappedError == error else { throw err }
-            return try handler(error)
+            return try handler(unwrappedError)
         }
     }
 }

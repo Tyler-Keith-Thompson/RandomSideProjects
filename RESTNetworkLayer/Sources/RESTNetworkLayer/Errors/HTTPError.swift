@@ -14,7 +14,7 @@ public protocol HTTPError: Error, Equatable {
 }
 
 extension HTTPError {
-    public static func == (lhs: any HTTPError, rhs: any HTTPError) -> Bool {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.statusCode == rhs.statusCode
     }
 }
