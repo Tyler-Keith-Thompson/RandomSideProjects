@@ -23,7 +23,8 @@ final class HTTPOperatorsTests: XCTestCase {
         HTTPStubs.removeAllStubs()
 
         stub { _ in true } response: { req in
-            HTTPStubsResponse(error: URLError.init(.badURL))
+            XCTFail("Unexpected request made: \(req)")
+            return HTTPStubsResponse(error: URLError.init(.badURL))
         }
     }
 
