@@ -11,11 +11,13 @@ let package = Package(
         .library(
             name: "RESTNetworkLayer",
             targets: ["RESTNetworkLayer"]),
+        .library(
+            name: "PostService",
+            targets: ["PostService"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/AliSoftware/OHHTTPStubs", .upToNextMajor(from: "9.1.0")),
-        .package(url: "https://github.com/vadymmarkov/Fakery.git", .upToNextMajor(from: "5.1.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -23,13 +25,14 @@ let package = Package(
         .target(
             name: "RESTNetworkLayer",
             dependencies: []),
+        .target(name: "PostService",
+               dependencies: ["RESTNetworkLayer"]),
         .testTarget(
             name: "RESTNetworkLayerTests",
             dependencies: [
                 "RESTNetworkLayer",
                 .product(name: "OHHTTPStubs", package: "OHHTTPStubs"),
                 .product(name: "OHHTTPStubsSwift", package: "OHHTTPStubs"),
-                .product(name: "Fakery", package: "Fakery"),
             ]),
     ]
 )

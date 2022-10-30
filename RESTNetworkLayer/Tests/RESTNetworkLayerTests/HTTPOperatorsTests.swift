@@ -133,7 +133,8 @@ final class HTTPOperatorsTests: XCTestCase {
             HTTPStubsResponse(data: Data(), statusCode: Int32(HTTPClientError.tooManyRequests().statusCode), headers: ["Retry-After": "\(retryAfter)"])
         }
         .thenRespond(on: isAbsoluteURLString("https://jsonplaceholder.typicode.com/posts") && isMethodGET()) { _ in
-            HTTPStubsResponse(data: Data(), statusCode: Int32(HTTPClientError.tooManyRequests().statusCode), headers: ["Retry-After": "\(retryAfter)"])
+            XCTFail("Should not have made a 3rd request")
+            return HTTPStubsResponse(data: Data(), statusCode: Int32(HTTPClientError.tooManyRequests().statusCode), headers: ["Retry-After": "\(retryAfter)"])
         }
 
         let api = JSONPlaceholder()
