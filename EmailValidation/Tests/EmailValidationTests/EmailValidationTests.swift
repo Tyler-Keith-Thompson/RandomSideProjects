@@ -114,7 +114,7 @@ final class EmailValidationTests: XCTestCase {
         XCTAssertNoThrow(try Email("θσερ@εχαμπλε.ψομ")) // Greek
         XCTAssertNoThrow(try Email("дядя_вася@деревня.рф")) // Russian
 
-        #warning("Known deficiencies: newline characters anywhere, RFC 822/2822")
+        #warning("Known deficiencies: groups, RFC 822/2822")
     }
 
     func testInvalidEmails() {
