@@ -9,6 +9,7 @@ enum QuotedString {
 
     static func parser() -> some Parser<Substring, String> {
         Parse {
+            CFWS.parser()
             "\""
             Many(into: "") { string, fragment in
                 string += fragment
@@ -21,7 +22,8 @@ enum QuotedString {
             } terminator: {
                 "\""
             }
+            CFWS.parser()
         }
-        .map { "\"\($0)\"" }
+        .map { "\($0.0 ?? "")\"\($0.1)\"\($0.2 ?? "")" }
     }
 }

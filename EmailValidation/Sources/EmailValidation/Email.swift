@@ -23,6 +23,7 @@ public struct Email {
 
     public init(_ emailStr: String) throws {
         mailbox = emailStr
+
         let localPartParser = Parse {
             OneOf {
                 QuotedString.parser()
@@ -34,13 +35,13 @@ public struct Email {
             "["
             IPv4.parser()
             "]"
-        }.map { "\($0).\($1).\($2).\($3)" }
+        }.map { "[\($0).\($1).\($2).\($3)]" }
 
         let IPv6LiteralParser = Parse {
             "[IPv6:"
             IPv6.parser()
             "]"
-        }.map(\.string)
+        }.map { "[IPv6:\($0.string)]" }
 
         let domainLiteralParser = Parse {
             OneOf {
@@ -62,6 +63,14 @@ public struct Email {
             domainPartParser
         }
 
+        let angleAddrParser = Parse {
+            CFWS.parser()
+            "<"
+            addrSpecParser
+            ">"
+            CFWS.parser()
+        }
+
         let nameAddrParser = Parse {
             OneOf {
                 QuotedString.parser()
@@ -70,12 +79,8 @@ public struct Email {
                     .union(["."])
                     .map(.string)
             }
-            Optionally { Comment.parser() }
-            Optionally { CharacterSet.whitespaces }
-            "<"
-            addrSpecParser
-            ">"
-        }.map { $0.3 }
+            angleAddrParser
+        }.map { $1.1 }
 
         let mailboxParser = Parse {
             OneOf {

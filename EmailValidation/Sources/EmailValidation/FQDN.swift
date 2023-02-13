@@ -5,7 +5,7 @@ typealias FQDN = FullyQualifiedDomainName
 
 struct FullyQualifiedDomainName: Parser {
     enum ParserError: Error {
-        case invalidSubLevelDomain
+        case invalidSubdomain
         case invalidTopLevelDomain
         case emptyAtom
         case invalidAtom
@@ -28,7 +28,7 @@ struct FullyQualifiedDomainName: Parser {
 
         try atoms.map(\.atom).forEach {
             if $0.isEmpty {
-                throw ParserError.invalidSubLevelDomain
+                throw ParserError.invalidSubdomain
             } else if $0.prefix(1) == "-" || $0.suffix(1) == "-" {
                 throw ParserError.invalidAtom
             } else if $0.count > 63 {

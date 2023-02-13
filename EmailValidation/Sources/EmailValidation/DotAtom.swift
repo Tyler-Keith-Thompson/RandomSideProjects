@@ -16,9 +16,9 @@ struct DotAtom: Parser {
         let atoms = try Many(into: [(lComment: String?, atom: Substring, rComment: String?)]()) {
             $0.append($1)
         } element: {
-            Optionally { Comment.parser() }
+            CFWS.parser()
             CharacterSet.dotAtomAText
-            Optionally { Comment.parser() }
+            CFWS.parser()
         } separator: {
             "."
         }.parse(&input)
