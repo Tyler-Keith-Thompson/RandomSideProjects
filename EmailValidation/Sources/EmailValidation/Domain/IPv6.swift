@@ -30,7 +30,8 @@ struct IPv6 {
     var string: String {
         blocks.enumerated().reduce(into: [String]()) { arr, el in
             if let startSubsequenceOffset = longestSubsequence?.first?.offset,
-               let endSubsequenceOffset = longestSubsequence?.last?.offset {
+               let endSubsequenceOffset = longestSubsequence?.last?.offset,
+               startSubsequenceOffset != endSubsequenceOffset {
                 if el.offset == startSubsequenceOffset && el.offset == 0 {
                     arr.append("")
                 } else if el.offset == endSubsequenceOffset {

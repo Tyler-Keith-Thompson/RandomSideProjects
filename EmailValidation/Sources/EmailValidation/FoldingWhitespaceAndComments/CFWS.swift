@@ -3,13 +3,9 @@ import Foundation
 
 typealias CFWS = CommentsAndFoldableWhitespace
 
-struct CommentsAndFoldableWhitespace: Parser {
+enum CommentsAndFoldableWhitespace {
     static func parser() -> some Parser<Substring, String?> {
-        Self()
-    }
-
-    func parse(_ input: inout Substring) throws -> String? {
-        try Parse {
+        Parse {
             FWS.parser()
             Optionally { Comment.parser() }
             FWS.parser()
@@ -20,6 +16,5 @@ struct CommentsAndFoldableWhitespace: Parser {
             }
             return "\($0.0 ?? "")\(comment)\($0.2 ?? "")"
         }
-        .parse(&input)
     }
 }
