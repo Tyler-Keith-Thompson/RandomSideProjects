@@ -7,12 +7,12 @@ enum QuotedString {
         Prefix(1)
     }.map { "\\\($0)" }
 
-    static func parser() -> some Parser<Substring, String> {
+    static func parser() -> some Parser<Substring, Token> {
         Parse {
             CFWS.parser()
             "\""
-            Many(into: "") { string, fragment in
-                string += fragment
+            Many(into: "") { qText, fragment in
+                qText += fragment
             } element: {
                 OneOf {
                     Prefix(1...) { $0 != "\"" && $0 != "\\" }.map(.string)
@@ -21,9 +21,9 @@ enum QuotedString {
                 }
             } terminator: {
                 "\""
-            }
+            }.map { Token.qText($0) }
             CFWS.parser()
         }
-        .map { "\($0.0 ?? "")\"\($0.1)\"\($0.2 ?? "")" }
+        .map { .quotedString([$0.0, [$0.1], $0.2].flatMap { $0 }) }
     }
 }

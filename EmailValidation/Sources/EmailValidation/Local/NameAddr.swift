@@ -4,7 +4,7 @@ import Parsing
 public typealias NameAddr = NameAddress
 
 public enum NameAddress {
-    static func parser() -> some Parser<Substring, (localPart: String, domainPart: String)> {
+    static func parser() -> some Parser<Substring, (localPart: Token, domainPart: Token)> {
         let angleAddrParser = Parse {
             CFWS.parser()
             "<"
@@ -19,7 +19,7 @@ public enum NameAddress {
                 CharacterSet.dotAtomAText
                     .union(CharacterSet.whitespaces)
                     .union(["."])
-                    .map(.string)
+                    .map { Token.aText($0) }
             }
             angleAddrParser
         }.map { $1.1 }

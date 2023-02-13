@@ -2,22 +2,26 @@ import Foundation
 import Parsing
 
 enum Comment {
-    static func parser() -> some Parser<Substring, String> {
+    static func stringParser() -> some Parser<Substring, Substring> {
         Parse {
             "("
-            Many(into: "") { string, fragment in
+            Many(into: Substring("(")) { string, fragment in
                 string += fragment
             } element: {
                 OneOf {
-                    Prefix(1...) { $0 != "(" && $0 != ")" }.map(String.init)
+                    Prefix(1...) { $0 != "(" && $0 != ")" }
 
-                    Lazy { Self.parser() }
+                    Lazy { Self.stringParser() }
                 }
             } terminator: {
                 ")"
             }
         }
-        .map { "(\($0))" }
+        .map { $0 + ")" }
         .eraseToAnyParser()
+    }
+    static func parser() -> some Parser<Substring, Token> {
+        stringParser()
+            .map { .comment($0) }
     }
 }

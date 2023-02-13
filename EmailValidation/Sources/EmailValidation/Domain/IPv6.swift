@@ -8,7 +8,7 @@ struct IPv6 {
         case tooManyBlocks
     }
 
-    static func parser() -> some Parser<Substring, IPv6> {
+    static func parser() -> some Parser<Substring, Token> {
         IPv6Parser()
     }
 
@@ -75,7 +75,7 @@ struct IPv6 {
     }
 
     struct IPv6Parser: Parser {
-        func parse(_ input: inout Substring) throws -> IPv6 {
+        func parse(_ input: inout Substring) throws -> Token {
             let groups = try Many(into: [GroupContent]()) {
                 if let block = $1 {
                     $0.append(.block(block))
@@ -89,7 +89,7 @@ struct IPv6 {
             }
             .parse(&input)
 
-            return try IPv6(groups: groups)
+            return .IPv6Literal(try IPv6(groups: groups))
         }
     }
 }

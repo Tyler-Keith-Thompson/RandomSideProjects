@@ -2,10 +2,10 @@ import Foundation
 import Parsing
 
 public enum Mailbox {
-    @ParserBuilder static func parser() -> some Parser<Substring, (localPart: String, domainPart: String)> {
+    @ParserBuilder static func parser() -> some Parser<Substring, (localPart: Token, domainPart: Token)> {
         OneOf {
-            NameAddr.parser()
             AddrSpec.parser()
+            NameAddr.parser()
         }
     }
 }

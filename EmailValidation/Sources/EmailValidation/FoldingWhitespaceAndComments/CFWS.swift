@@ -4,17 +4,12 @@ import Foundation
 typealias CFWS = CommentsAndFoldableWhitespace
 
 enum CommentsAndFoldableWhitespace {
-    static func parser() -> some Parser<Substring, String?> {
+    static func parser() -> some Parser<Substring, [Token]> {
         Parse {
             FWS.parser()
             Optionally { Comment.parser() }
             FWS.parser()
         }
-        .map {
-            guard let comment = $0.1 else {
-                return nil
-            }
-            return "\($0.0 ?? "")\(comment)\($0.2 ?? "")"
-        }
+        .map { [ $0, $1, $2].compactMap { $0 } }
     }
 }

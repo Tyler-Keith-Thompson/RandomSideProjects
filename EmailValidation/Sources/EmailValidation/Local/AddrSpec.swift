@@ -4,11 +4,11 @@ import Parsing
 public typealias AddrSpec = AddressSpecification
 
 public enum AddressSpecification {
-    static func parser() -> some Parser<Substring, (localPart: String, domainPart: String)> {
+    static func parser() -> some Parser<Substring, (localPart: Token, domainPart: Token)> {
         let localPartParser = Parse {
             OneOf {
                 QuotedString.parser()
-                DotAtom.parser().map { $0.lazy.map { "\($0.lComment ?? "")\($0.atom)\($0.rComment ?? "")" }.joined(separator: ".") }
+                DotAtom.parser()
             }
         }
 
@@ -16,13 +16,13 @@ public enum AddressSpecification {
             "["
             IPv4.parser()
             "]"
-        }.map { "[\($0).\($1).\($2).\($3)]" }
+        }
 
         let IPv6LiteralParser = Parse {
             "[IPv6:"
             IPv6.parser()
             "]"
-        }.map { "[IPv6:\($0.string)]" }
+        }
 
         let domainLiteralParser = Parse {
             OneOf {

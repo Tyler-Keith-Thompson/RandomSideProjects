@@ -13,20 +13,24 @@ struct FullyQualifiedDomainName: Parser {
         case invalidCharacter
     }
 
-    static func parser() -> some Parser<Substring, String> {
+    static func parser() -> some Parser<Substring, Token> {
         Self()
     }
 
-    func parse(_ input: inout Substring) throws -> String {
-        let atoms = try DotAtom.parser().parse(&input)
+    func parse(_ input: inout Substring) throws -> Token {
+        let dotAtomToken = try DotAtom.parser().parse(&input)
+        guard case .dotAtom(let dotAtomTokens) = dotAtomToken.semanticOnly else {
+            throw ParserError.invalidAtom
+        }
+        let aTexts: [String] = dotAtomTokens.map(\.description)
 
-        guard let tld = atoms.last?.atom, !tld.isEmpty else { throw ParserError.emptyAtom }
+        guard let tld = aTexts.last else { throw ParserError.emptyAtom }
 
-        if tld.flatMap({ $0.unicodeScalars }).allSatisfy({ CharacterSet.decimalDigits.contains($0) }) {
+        if tld.lazy.flatMap({ $0.unicodeScalars }).allSatisfy({ CharacterSet.decimalDigits.contains($0) }) {
             throw ParserError.invalidTopLevelDomain
         }
 
-        try atoms.map(\.atom).forEach {
+        try aTexts.forEach {
             if $0.isEmpty {
                 throw ParserError.invalidSubdomain
             } else if $0.prefix(1) == "-" || $0.suffix(1) == "-" {
@@ -34,10 +38,11 @@ struct FullyQualifiedDomainName: Parser {
             } else if $0.count > 63 {
                 throw ParserError.atomTooLong
             }
-            let allValidChars = $0.flatMap(\.unicodeScalars).allSatisfy { CharacterSet.alphanumerics.union(["-"]).contains($0) }
-            guard allValidChars else { throw ParserError.invalidCharacter }
+            guard CharacterSet($0.unicodeScalars).subtracting(CharacterSet.alphanumerics.union(["-"])).isEmpty else {
+                throw ParserError.invalidCharacter
+            }
         }
 
-        return atoms.lazy.map { "\($0.lComment ?? "")\($0.atom)\($0.rComment ?? "")" }.joined(separator: ".")
+        return dotAtomToken
     }
 }

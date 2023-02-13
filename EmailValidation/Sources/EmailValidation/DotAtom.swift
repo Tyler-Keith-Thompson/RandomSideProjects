@@ -8,16 +8,17 @@ struct DotAtom: Parser {
         case atomTooLong
     }
 
-    static func parser() -> some Parser<Substring, [(lComment: String?, atom: Substring, rComment: String?)]> {
+    static func parser() -> some Parser<Substring, Token> {
         Self()
     }
 
-    func parse(_ input: inout Substring) throws -> [(lComment: String?, atom: Substring, rComment: String?)] {
-        let atoms = try Many(into: [(lComment: String?, atom: Substring, rComment: String?)]()) {
-            $0.append($1)
+    func parse(_ input: inout Substring) throws -> Token {
+        let atoms = try Many(into: [(lcfws: [Token], aText: Token, rcfws: [Token])]()) {
+            $0.append((lcfws: $1.0, aText: $1.1, rcfws: $1.2))
         } element: {
             CFWS.parser()
             CharacterSet.dotAtomAText
+                .map { Token.aText($0) }
             CFWS.parser()
         } separator: {
             "."
@@ -26,7 +27,7 @@ struct DotAtom: Parser {
         guard !atoms.isEmpty else { throw ParserError.emptyAtom }
 
         try atoms.lazy
-            .map(\.atom)
+            .map(\.aText.description)
             .forEach {
                 if $0.isEmpty {
                     throw ParserError.emptyAtom
@@ -35,7 +36,7 @@ struct DotAtom: Parser {
                 }
             }
 
-        return atoms
+        return .dotAtom(atoms.map { .atom($0.lcfws + [$0.aText] + $0.rcfws) })
     }
 }
 
@@ -46,6 +47,6 @@ extension CharacterSet {
         // Control characters shouldn't be in either set, but just to be sure, get rid of them.
         .subtracting(CharacterSet.controlCharacters)
         // Disallowed atom symbols
-        .subtracting(["@", "(", ")", "<", ">", ".", "\"", "[", "]"])
+        .subtracting(["@", "(", ")", "<", ">", ".", "\"", "[", "]", ","])
     }()
 }
