@@ -2,11 +2,24 @@ import XCTest
 @testable import FluentTask
 
 final class FluentTaskTests: XCTestCase {
-    func testExample() throws {
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
-
-        // Defining Test Cases and Test Methods
-        // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
+    func testDeferredTaskDoesNotExecuteImmediately() async throws {
+        let notFiredExpectation = expectation(description: "did not fire")
+        notFiredExpectation.isInverted = true
+        
+        let task = DeferredTask {
+            notFiredExpectation.fulfill()
+        }
+        
+        await fulfillment(of: [notFiredExpectation], timeout: 0.001)
+    }
+    
+    func testDeferredTaskExecutesWhenAskedTo() async throws {
+        let firedExpectation = expectation(description: "did not fire")
+        
+        DeferredTask {
+            firedExpectation.fulfill()
+        }.execute()
+        
+        await fulfillment(of: [firedExpectation], timeout: 0.001)
     }
 }
