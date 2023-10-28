@@ -7,6 +7,8 @@
 
 import Foundation
 
+// TODO: Write a test to ensure multiple retry operators behave as expected
+// There's a chance this needs to be changed to an actor that keeps track of how many retries were performed
 extension Workers {
     struct Retry<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
