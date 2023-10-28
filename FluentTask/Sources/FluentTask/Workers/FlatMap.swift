@@ -8,8 +8,8 @@
 import Foundation
 
 extension Workers {
-    public struct FlatMap<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        public let taskCreator: @Sendable () -> Task<Success, Failure>
+    struct FlatMap<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
+        let taskCreator: @Sendable () -> Task<Success, Failure>
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) where Failure == Error {
             taskCreator = {

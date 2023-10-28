@@ -6,7 +6,7 @@ final class FluentTaskTests: XCTestCase {
         let notFiredExpectation = expectation(description: "did not fire")
         notFiredExpectation.isInverted = true
         
-        let task = DeferredTask {
+        _ = DeferredTask {
             notFiredExpectation.fulfill()
         }
         

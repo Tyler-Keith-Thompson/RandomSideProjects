@@ -8,9 +8,9 @@
 import Foundation
 
 extension Workers {
-    public struct Map<Success: Sendable>: AsynchronousUnitOfWork {
-        public typealias Failure = Error
-        public let taskCreator: @Sendable () -> Task<Success, Failure>
+    struct Map<Success: Sendable>: AsynchronousUnitOfWork {
+        typealias Failure = Error
+        let taskCreator: @Sendable () -> Task<Success, Failure>
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) {
             taskCreator = {
@@ -21,9 +21,9 @@ extension Workers {
         }
     }
     
-    public struct TryMap<Success: Sendable>: AsynchronousUnitOfWork {
-        public typealias Failure = Error
-        public let taskCreator: @Sendable () -> Task<Success, Failure>
+    struct TryMap<Success: Sendable>: AsynchronousUnitOfWork {
+        typealias Failure = Error
+        let taskCreator: @Sendable () -> Task<Success, Failure>
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) {
             taskCreator = {

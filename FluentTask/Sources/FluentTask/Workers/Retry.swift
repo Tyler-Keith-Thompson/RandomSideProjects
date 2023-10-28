@@ -8,8 +8,8 @@
 import Foundation
 
 extension Workers {
-    public struct Retry<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        public let taskCreator: @Sendable () -> Task<Success, Failure>
+    struct Retry<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
+        let taskCreator: @Sendable () -> Task<Success, Failure>
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, retries: UInt) where Failure == Error, U.Success == Success, U.Failure == Failure {
             guard retries > 0 else { taskCreator = upstream.taskCreator; return }

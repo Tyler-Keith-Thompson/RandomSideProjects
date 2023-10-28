@@ -8,8 +8,8 @@
 import Foundation
 
 extension Workers {
-    public actor Share<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        public let taskCreator: @Sendable () -> Task<Success, Failure>
+    actor Share<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
+        let taskCreator: @Sendable () -> Task<Success, Failure>
         private lazy var task = taskCreator()
         
         init<U: AsynchronousUnitOfWork>(upstream: U) where U.Success == Success, U.Failure == Failure {
