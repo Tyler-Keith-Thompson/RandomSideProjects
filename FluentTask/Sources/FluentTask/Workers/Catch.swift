@@ -32,7 +32,23 @@ extension AsynchronousUnitOfWork {
         Workers.Catch(upstream: self, handler)
     }
     
+    public func `catch`<D: AsynchronousUnitOfWork, E: Error & Equatable>(_ error: E, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async -> D) -> some AsynchronousUnitOfWork<D.Success> where Success == D.Success {
+        tryCatch { err in
+            guard let unwrappedError = (err as? E),
+                  unwrappedError == error else { throw err }
+            return await handler(unwrappedError)
+        }
+    }
+    
     public func tryCatch<D: AsynchronousUnitOfWork>(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> D) -> some AsynchronousUnitOfWork<D.Success> where Success == D.Success {
         Workers.Catch(upstream: self, handler)
+    }
+    
+    public func tryCatch<D: AsynchronousUnitOfWork, E: Error & Equatable>(_ error: E, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> D) -> some AsynchronousUnitOfWork<D.Success> where Success == D.Success {
+        tryCatch { err in
+            guard let unwrappedError = (err as? E),
+                  unwrappedError == error else { throw err }
+            return try await handler(unwrappedError)
+        }
     }
 }
