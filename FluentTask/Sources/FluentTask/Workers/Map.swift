@@ -9,7 +9,6 @@ import Foundation
 
 extension Workers {
     struct Map<Success: Sendable>: AsynchronousUnitOfWork {
-        typealias Failure = Error
         let state: TaskState<Success>
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) {
@@ -24,7 +23,6 @@ extension Workers {
     }
     
     struct TryMap<Success: Sendable>: AsynchronousUnitOfWork {
-        typealias Failure = Error
         let state: TaskState<Success>
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) {
