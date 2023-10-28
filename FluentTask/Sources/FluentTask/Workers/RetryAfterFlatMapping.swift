@@ -35,6 +35,7 @@ extension Workers {
         }
         
         func decrementRetry() {
+            guard retryCount > 0 else { return }
             retryCount -= 1
         }
     }
@@ -69,6 +70,7 @@ extension Workers {
         }
         
         func decrementRetry() {
+            guard retryCount > 0 else { return }
             retryCount -= 1
         }
     }
