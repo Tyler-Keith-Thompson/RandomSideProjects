@@ -12,7 +12,7 @@ extension Workers {
     struct Delay<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork, C: Clock>(priority: TaskPriority?, upstream: U, duration: C.Instant.Duration, tolerance: C.Instant.Duration?, clock: C) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork, C: Clock>(upstream: U, duration: C.Instant.Duration, tolerance: C.Instant.Duration?, clock: C) where U.Success == Success {
             state = TaskState {
                 let val = try await upstream.operation()
                 try Task.checkCancellation()
@@ -25,7 +25,7 @@ extension Workers {
 
 extension AsynchronousUnitOfWork {
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-    public func delay<C: Clock>(priority: TaskPriority? = nil, for duration: C.Instant.Duration, tolerance: C.Instant.Duration? = nil, clock: C = ContinuousClock()) -> some AsynchronousUnitOfWork<Success> {
-        Workers.Delay(priority: priority, upstream: self, duration: duration, tolerance: tolerance, clock: clock)
+    public func delay<C: Clock>(for duration: C.Instant.Duration, tolerance: C.Instant.Duration? = nil, clock: C = ContinuousClock()) -> some AsynchronousUnitOfWork<Success> {
+        Workers.Delay(upstream: self, duration: duration, tolerance: tolerance, clock: clock)
     }
 }

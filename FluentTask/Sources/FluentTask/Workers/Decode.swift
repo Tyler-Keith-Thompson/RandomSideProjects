@@ -18,7 +18,7 @@ extension Workers {
     struct Decode<Success: Sendable & Decodable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork, D: TopLevelDecoder>(priority: TaskPriority?, upstream: U, decoder: D) where U.Success == D.Input {
+        init<U: AsynchronousUnitOfWork, D: TopLevelDecoder>(upstream: U, decoder: D) where U.Success == D.Input {
             state = TaskState {
                 let val = try await upstream.operation()
                 try Task.checkCancellation()
@@ -29,7 +29,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func decode<T: Decodable, D: TopLevelDecoder>(priority: TaskPriority? = nil, type: T.Type, decoder: D) -> some AsynchronousUnitOfWork<T> where Success == D.Input {
-        Workers.Decode(priority: priority, upstream: self, decoder: decoder)
+    public func decode<T: Decodable, D: TopLevelDecoder>(type: T.Type, decoder: D) -> some AsynchronousUnitOfWork<T> where Success == D.Input {
+        Workers.Decode(upstream: self, decoder: decoder)
     }
 }

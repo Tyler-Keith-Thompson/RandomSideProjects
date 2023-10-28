@@ -11,7 +11,7 @@ extension Workers {
     struct Catch<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) where U.Success == Success {
             state = TaskState {
                 do {
                     let val = try await upstream.operation()
@@ -32,11 +32,11 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func `catch`(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
-        Workers.Catch(priority: priority, upstream: self, handler)
+    public func `catch`(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
+        Workers.Catch(upstream: self, handler)
     }
     
-    public func tryCatch(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
-        Workers.Catch(priority: priority, upstream: self, handler)
+    public func tryCatch(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
+        Workers.Catch(upstream: self, handler)
     }
 }

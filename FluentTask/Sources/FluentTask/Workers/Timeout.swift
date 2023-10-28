@@ -10,7 +10,7 @@ extension Workers {
     struct Timeout<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, duration: Measurement<UnitDuration>) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork>(upstream: U, duration: Measurement<UnitDuration>) where U.Success == Success {
             state = TaskState {
                 let task = Task {
                     let taskResult = try await upstream.operation()
@@ -23,7 +23,7 @@ extension Workers {
                     task.cancel()
                 }
                 
-                return try await Task(priority: priority) {
+                return try await Task {
                     try Task.checkCancellation()
                     let result = try await task.value
                     try Task.checkCancellation()
@@ -36,7 +36,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func timeout(priority: TaskPriority? = nil, _ duration: Measurement<UnitDuration>) -> some AsynchronousUnitOfWork<Success> {
-        Workers.Timeout(priority: priority, upstream: self, duration: duration)
+    public func timeout(_ duration: Measurement<UnitDuration>) -> some AsynchronousUnitOfWork<Success> {
+        Workers.Timeout(upstream: self, duration: duration)
     }
 }

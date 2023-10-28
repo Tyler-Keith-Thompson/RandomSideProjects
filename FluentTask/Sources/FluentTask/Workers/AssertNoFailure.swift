@@ -11,7 +11,7 @@ extension Workers {
     struct AssertNoFailure<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
         
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork>(upstream: U) where U.Success == Success {
             state = TaskState {
                 do {
                     let val = try await upstream.operation()
@@ -30,6 +30,6 @@ extension Workers {
 
 extension AsynchronousUnitOfWork {
     public func assertNoFailure(priority: TaskPriority? = nil) -> some AsynchronousUnitOfWork<Success> {
-        Workers.AssertNoFailure(priority: priority, upstream: self)
+        Workers.AssertNoFailure(upstream: self)
     }
 }

@@ -11,7 +11,7 @@ extension Workers {
     struct Retry<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, retries: UInt) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork>(upstream: U, retries: UInt) where U.Success == Success {
             guard retries > 0 else { state = upstream.state; return }
             state = TaskState {
                 for _ in 0..<retries {
@@ -31,7 +31,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func retry(priority: TaskPriority? = nil, _ retries: UInt = 1) -> some AsynchronousUnitOfWork<Success> {
-        Workers.Retry(priority: priority, upstream: self, retries: retries)
+    public func retry(_ retries: UInt = 1) -> some AsynchronousUnitOfWork<Success> {
+        Workers.Retry(upstream: self, retries: retries)
     }
 }

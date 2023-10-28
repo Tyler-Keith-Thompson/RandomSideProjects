@@ -18,7 +18,7 @@ extension Workers {
     struct Encode<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork, E: TopLevelEncoder>(priority: TaskPriority?, upstream: U, encoder: E) where Success == E.Output, U.Success: Encodable {
+        init<U: AsynchronousUnitOfWork, E: TopLevelEncoder>(upstream: U, encoder: E) where Success == E.Output, U.Success: Encodable {
             state = TaskState {
                 let val = try await upstream.operation()
                 try Task.checkCancellation()
@@ -29,7 +29,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func encode<E: TopLevelEncoder>(priority: TaskPriority? = nil, encoder: E) -> some AsynchronousUnitOfWork<E.Output> where Success: Encodable {
-        Workers.Encode(priority: priority, upstream: self, encoder: encoder)
+    public func encode<E: TopLevelEncoder>(encoder: E) -> some AsynchronousUnitOfWork<E.Output> where Success: Encodable {
+        Workers.Encode(upstream: self, encoder: encoder)
     }
 }

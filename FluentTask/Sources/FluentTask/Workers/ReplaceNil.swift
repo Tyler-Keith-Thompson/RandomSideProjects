@@ -10,7 +10,7 @@ extension Workers {
     struct ReplaceNil<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, newValue: Success) where U.Success == Success? {
+        init<U: AsynchronousUnitOfWork>(upstream: U, newValue: Success) where U.Success == Success? {
             state = TaskState {
                 if let val = try await upstream.operation() {
                     try Task.checkCancellation()
@@ -25,7 +25,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func replaceNil<S: Sendable>(priority: TaskPriority? = nil, with value: S) -> some AsynchronousUnitOfWork<S> where Success == S? {
-        Workers.ReplaceNil<S>(priority: priority, upstream: self, newValue: value)
+    public func replaceNil<S: Sendable>(with value: S) -> some AsynchronousUnitOfWork<S> where Success == S? {
+        Workers.ReplaceNil<S>(upstream: self, newValue: value)
     }
 }
