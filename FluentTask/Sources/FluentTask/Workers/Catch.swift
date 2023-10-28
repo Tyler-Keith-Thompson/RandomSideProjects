@@ -11,7 +11,7 @@ extension Workers {
     struct Catch<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) where U.Success == Success {
+        init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> D) where Success == U.Success, U.Success == D.Success {
             state = TaskState {
                 do {
                     return try await upstream.operation()
@@ -19,9 +19,7 @@ extension Workers {
                     if error is CancellationError {
                         throw error
                     } else {
-                        let val = try await handler(error)
-                        try Task.checkCancellation()
-                        return val
+                        return try await handler(error).operation()
                     }
                 }
             }
@@ -30,11 +28,11 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func `catch`(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
+    public func `catch`<D: AsynchronousUnitOfWork>(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async -> D) -> some AsynchronousUnitOfWork<D.Success> where Success == D.Success {
         Workers.Catch(upstream: self, handler)
     }
     
-    public func tryCatch(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
+    public func tryCatch<D: AsynchronousUnitOfWork>(@_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> D) -> some AsynchronousUnitOfWork<D.Success> where Success == D.Success {
         Workers.Catch(upstream: self, handler)
     }
 }

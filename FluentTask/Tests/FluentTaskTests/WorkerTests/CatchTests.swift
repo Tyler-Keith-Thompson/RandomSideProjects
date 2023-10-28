@@ -12,7 +12,7 @@ import XCTest
 final class CatchTests: XCTestCase {
     func testCatchDoesNotInterfereWithNoFailure() async throws {
         let val = try await DeferredTask { 1 }
-            .catch { _ in 2 }
+            .catch { _ in DeferredTask { 2 } }
             .result
             .get()
         
@@ -22,9 +22,9 @@ final class CatchTests: XCTestCase {
     func testCatchDoesNotThrowError() async throws {
         let val = try await DeferredTask { 1 }
             .tryMap { _ in throw URLError(.badURL) }
-            .catch { error -> Int in
+            .catch { error -> DeferredTask<Int> in
                 XCTAssertEqual(error as? URLError, URLError(.badURL))
-                return 2
+                return DeferredTask { 2 }
             }
             .result
         
@@ -33,7 +33,7 @@ final class CatchTests: XCTestCase {
 
     func testTryCatchDoesNotInterfereWithNoFailure() async throws {
         let val = try await DeferredTask { 1 }
-            .tryCatch { _ in 2 }
+            .tryCatch { _ in DeferredTask { 2 } }
             .result
             .get()
         
@@ -43,9 +43,9 @@ final class CatchTests: XCTestCase {
     func testTryCatchDoesNotThrowError() async throws {
         let val = try await DeferredTask { 1 }
             .tryMap { _ in throw URLError(.badURL) }
-            .tryCatch { error -> Int in
+            .tryCatch { error -> DeferredTask<Int> in
                 XCTAssertEqual(error as? URLError, URLError(.badURL))
-                return 2
+                return DeferredTask { 2 }
             }
             .result
         
