@@ -16,7 +16,7 @@ final class FluentTaskTests: XCTestCase {
     func testDeferredTaskExecutesWhenAskedTo() async throws {
         let firedExpectation = expectation(description: "did not fire")
         
-        DeferredTask {
+        try DeferredTask {
             firedExpectation.fulfill()
         }.execute()
         

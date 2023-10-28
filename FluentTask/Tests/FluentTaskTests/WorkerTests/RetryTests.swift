@@ -27,7 +27,7 @@ final class RetryTests: XCTestCase {
         .tryMap { _ in throw URLError(.badURL) }
         .retry(retryCount)
         
-        _ = await t.result
+        _ = try await t.result
         
         let copy = await test.arr
         XCTAssertEqual(UInt(copy.count), retryCount + 1)
@@ -49,7 +49,7 @@ final class RetryTests: XCTestCase {
         .tryMap { _ in throw URLError(.badURL) }
         .retry(0)
         
-        _ = await t.result
+        _ = try await t.result
         
         let copy = await test.arr
         XCTAssertEqual(UInt(copy.count), 1)
@@ -71,7 +71,7 @@ final class RetryTests: XCTestCase {
         .tryMap { _ in throw URLError(.badURL) }
         .retry()
         
-        _ = await t.result
+        _ = try await t.result
         
         let copy = await test.arr
         XCTAssertEqual(UInt(copy.count), 2)
@@ -92,7 +92,7 @@ final class RetryTests: XCTestCase {
         }
         .retry(10)
         
-        _ = await t.result
+        _ = try await t.result
         
         let copy = await test.arr
         XCTAssertEqual(UInt(copy.count), 1)

@@ -1,6 +1,5 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
 import Foundation
+import Atomics
 
 public protocol AsynchronousUnitOfWork<Success, Failure>: Sendable where Success: Sendable, Failure: Error {
     associatedtype Success
@@ -8,18 +7,18 @@ public protocol AsynchronousUnitOfWork<Success, Failure>: Sendable where Success
     
     var state: TaskState<Success, Failure> { get }
     
-    func execute()
-    var result: Result<Success, Failure> { get async }
+    func execute() throws
+    var result: Result<Success, Failure> { get async throws }
 }
 
 extension AsynchronousUnitOfWork {
     public var result: Result<Success, Failure> {
-        get async {
+        get async throws {
             await createTask().result
         }
     }
     
-    public func execute() {
+    public func execute() throws {
         createTask()
     }
     
@@ -28,6 +27,9 @@ extension AsynchronousUnitOfWork {
 
 public class TaskState<Success: Sendable, Failure: Error>: @unchecked Sendable {
     let taskCreator: @Sendable () -> Task<Success, Failure>
+    
+    private let _isCancelled = ManagedAtomic<Bool>(false)
+    
     init(taskCreator: @Sendable @escaping () -> Task<Success, Failure>) {
         self.taskCreator = taskCreator
     }

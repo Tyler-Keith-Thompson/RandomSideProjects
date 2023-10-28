@@ -13,7 +13,7 @@ final class DelayTests: XCTestCase {
     func testAssertNoFailureDoesNotThrowIfThereIsNoFailure() throws {
         let exp = self.expectation(description: "thing happened")
         let date = Date()
-        DeferredTask { }
+        try DeferredTask { }
             .delay(for: .milliseconds(10))
             .map { _ in exp.fulfill() }
             .execute()

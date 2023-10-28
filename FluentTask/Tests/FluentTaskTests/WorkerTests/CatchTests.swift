@@ -20,7 +20,7 @@ final class CatchTests: XCTestCase {
     }
     
     func testCatchDoesNotThrowError() async throws {
-        let val = await DeferredTask { 1 }
+        let val = try await DeferredTask { 1 }
             .tryMap { _ in throw URLError(.badURL) }
             .catch { error -> Int in
                 XCTAssertEqual(error as? URLError, URLError(.badURL))
@@ -41,7 +41,7 @@ final class CatchTests: XCTestCase {
     }
     
     func testTryCatchDoesNotThrowError() async throws {
-        let val = await DeferredTask { 1 }
+        let val = try await DeferredTask { 1 }
             .tryMap { _ in throw URLError(.badURL) }
             .tryCatch { error -> Int in
                 XCTAssertEqual(error as? URLError, URLError(.badURL))

@@ -29,7 +29,7 @@ final class MapTests: XCTestCase {
     }
     
     func testTryMapThrowsError() async throws {
-        let val = await DeferredTask { 1 }
+        let val = try await DeferredTask { 1 }
             .tryMap { _ in throw URLError(.badURL) }
             .result
         

@@ -15,7 +15,7 @@ final class AssertNoFailureTests: XCTestCase {
         throw XCTSkip("Sadly, CwlPreconditionTesting does not support concurrency yet, who knew?")
         XCTAssertThrowsFatalError {
             let exp = self.expectation(description: "thing happened")
-            DeferredTask {
+            try! DeferredTask {
                 throw URLError(.badURL)
             }
             .assertNoFailure()
@@ -28,7 +28,7 @@ final class AssertNoFailureTests: XCTestCase {
     
     func testAssertNoFailureDoesNotThrowIfThereIsNoFailure() throws {
         let exp = self.expectation(description: "thing happened")
-        DeferredTask {
+        try DeferredTask {
             1
         }
         .assertNoFailure()

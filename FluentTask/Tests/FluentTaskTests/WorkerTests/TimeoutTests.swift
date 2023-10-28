@@ -20,7 +20,7 @@ final class TimeoutTests: XCTestCase {
     }
     
     func testTaskTimesOutIfItTakesTooLong() async throws {
-        let res = await DeferredTask { "test" }
+        let res = try await DeferredTask { "test" }
             .delay(for: .milliseconds(20))
             .timeout(.milliseconds(10))
             .result

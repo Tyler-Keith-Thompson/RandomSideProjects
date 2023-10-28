@@ -29,7 +29,7 @@ final class FlatMapTests: XCTestCase {
         
         let test = Test()
         
-        _ = await DeferredTask {
+        _ = try await DeferredTask {
             try await Task.sleep(nanoseconds: 10000)
             await test.append("1")
         }.flatMap {
@@ -51,7 +51,7 @@ final class FlatMapTests: XCTestCase {
         
         let test = Test()
         
-        _ = await DeferredTask {
+        _ = try await DeferredTask {
             try! await Task.sleep(nanoseconds: 10000)
             await test.append("1")
         }.flatMap {
@@ -64,7 +64,7 @@ final class FlatMapTests: XCTestCase {
     }
     
     func testFlatMapThrowsError() async throws {
-        let val = await DeferredTask { 1 }
+        let val = try await DeferredTask { 1 }
             .flatMap { _ in throw URLError(.badURL) }
             .result
         
