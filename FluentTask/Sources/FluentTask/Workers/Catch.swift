@@ -29,4 +29,8 @@ extension AsynchronousUnitOfWork where Failure == Error {
     public func `catch`(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Failure) async throws -> Success) -> some AsynchronousUnitOfWork<Success, Failure> {
         Workers.Catch(priority: priority, upstream: self, handler)
     }
+    
+    public func tryCatch(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Failure) async throws -> Success) -> some AsynchronousUnitOfWork<Success, Failure> {
+        Workers.Catch(priority: priority, upstream: self, handler)
+    }
 }

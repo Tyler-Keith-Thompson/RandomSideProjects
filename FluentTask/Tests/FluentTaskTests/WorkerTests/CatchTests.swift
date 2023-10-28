@@ -31,4 +31,24 @@ final class CatchTests: XCTestCase {
         XCTAssertEqual(try val.get(), 2)
     }
 
+    func testTryCatchDoesNotInterfereWithNoFailure() async throws {
+        let val = try await DeferredTask { 1 }
+            .tryCatch { _ in 2 }
+            .result
+            .get()
+        
+        XCTAssertEqual(val, 1)
+    }
+    
+    func testTryCatchDoesNotThrowError() async throws {
+        let val = await DeferredTask { 1 }
+            .tryMap { _ in throw URLError(.badURL) }
+            .tryCatch { error -> Int in
+                XCTAssertEqual(error as? URLError, URLError(.badURL))
+                return 2
+            }
+            .result
+        
+        XCTAssertEqual(try val.get(), 2)
+    }
 }
