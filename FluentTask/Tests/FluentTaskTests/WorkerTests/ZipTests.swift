@@ -91,4 +91,54 @@ final class ZipTests: XCTestCase {
         let val = try await t4.result.get() // Steak sauce!!!
         XCTAssertEqual(val, "A1true")
     }
+    
+    func testZip4CombinesTasks_WithExplicitFailure() async throws {
+        let t1 = DeferredTask<Int, Error> { 1 }
+        let t2 = DeferredTask<String, Error> { "A" }
+        let t3 = DeferredTask<Bool, Error> { true }
+        let t4 = DeferredTask<Character, Error> { Character("!") }
+
+        let t5 = t2.zip(t1, t3, t4)
+        let val = try await t5.result.get() // Steak sauce!!!
+        XCTAssertEqual(val.0, "A")
+        XCTAssertEqual(val.1, 1)
+        XCTAssertEqual(val.2, true)
+        XCTAssertEqual(val.3, Character("!"))
+    }
+    
+    func testZip4CombinesTasks() async throws {
+        let t1 = DeferredTask { 1 }
+        let t2 = DeferredTask { "A" }
+        let t3 = DeferredTask { true }
+        let t4 = DeferredTask { Character("!") }
+
+        let t5 = t2.zip(t1, t3, t4)
+        let val = try await t5.result.get() // Steak sauce!!!
+        XCTAssertEqual(val.0, "A")
+        XCTAssertEqual(val.1, 1)
+        XCTAssertEqual(val.2, true)
+        XCTAssertEqual(val.3, Character("!"))
+    }
+    
+    func testZip4TransformCombinesTasks_WithExplicitFailure() async throws {
+        let t1 = DeferredTask<Int, Error> { 1 }
+        let t2 = DeferredTask<String, Error> { "A" }
+        let t3 = DeferredTask<Bool, Error> { true }
+        let t4 = DeferredTask<Character, Error> { Character("!") }
+
+        let t5 = t2.zip(t1, t3, t4) { $0 + String(describing: $1) + String(describing: $2) + String(describing: $3) }
+        let val = try await t5.result.get() // Steak sauce!!!
+        XCTAssertEqual(val, "A1true!")
+    }
+    
+    func testZip4TransformCombinesTasks() async throws {
+        let t1 = DeferredTask { 1 }
+        let t2 = DeferredTask { "A" }
+        let t3 = DeferredTask { true }
+        let t4 = DeferredTask { Character("!") }
+
+        let t5 = t2.zip(t1, t3, t4) { $0 + String(describing: $1) + String(describing: $2) + String(describing: $3) }
+        let val = try await t5.result.get() // Steak sauce!!!
+        XCTAssertEqual(val, "A1true!")
+    }
 }
