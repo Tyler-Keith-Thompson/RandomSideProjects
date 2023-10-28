@@ -39,6 +39,12 @@ extension AsynchronousUnitOfWork {
         Workers.Map(upstream: self, transform: transform)
     }
     
+    public func map<T>(_ keyPath: KeyPath<Success, T>) -> some AsynchronousUnitOfWork<T> {
+        Workers.Map(upstream: self) {
+            $0[keyPath: keyPath]
+        }
+    }
+    
     public func tryMap<S: Sendable>(@_inheritActorContext @_implicitSelfCapture _ transform: @escaping @Sendable (Success) async throws -> S) -> some AsynchronousUnitOfWork<S> {
         Workers.TryMap(upstream: self, transform: transform)
     }

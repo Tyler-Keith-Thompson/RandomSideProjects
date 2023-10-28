@@ -19,6 +19,20 @@ final class MapTests: XCTestCase {
         XCTAssertEqual(val, "1")
     }
     
+    func testMapTransformsWithKeypath() async throws {
+        struct Obj {
+            let val = 0
+            let other = 1
+        }
+        
+        let val = try await DeferredTask { Obj() }
+            .map(\.val)
+            .result
+            .get()
+        
+        XCTAssertEqual(val, 0)
+    }
+    
     func testTryMapTransformsValue() async throws {
         let val = try await DeferredTask { 1 }
             .tryMap { String(describing: $0) }
