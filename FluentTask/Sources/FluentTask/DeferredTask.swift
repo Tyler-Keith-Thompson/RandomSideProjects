@@ -6,6 +6,7 @@
 //
 
 import Foundation
+@_exported import AsyncAlgorithms
 
 public struct DeferredTask<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
     public let taskCreator: @Sendable () -> Task<Success, Failure>
