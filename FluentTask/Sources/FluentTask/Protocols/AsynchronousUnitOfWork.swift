@@ -6,7 +6,7 @@ public protocol AsynchronousUnitOfWork<Success, Failure>: Sendable where Success
     associatedtype Success
     associatedtype Failure
     
-    var taskCreator: @Sendable () -> Task<Success, Failure> { get }
+    var state: TaskState<Success, Failure> { get }
     
     func execute()
     var result: Result<Success, Failure> { get async }
@@ -15,11 +15,22 @@ public protocol AsynchronousUnitOfWork<Success, Failure>: Sendable where Success
 extension AsynchronousUnitOfWork {
     public var result: Result<Success, Failure> {
         get async {
-            await taskCreator().result
+            await createTask().result
         }
     }
     
     public func execute() {
-        _ = taskCreator()
+        createTask()
     }
+    
+    @discardableResult func createTask() -> Task<Success, Failure> { state.createTask() }
+}
+
+public class TaskState<Success: Sendable, Failure: Error>: @unchecked Sendable {
+    let taskCreator: @Sendable () -> Task<Success, Failure>
+    init(taskCreator: @Sendable @escaping () -> Task<Success, Failure>) {
+        self.taskCreator = taskCreator
+    }
+    
+    func createTask() -> Task<Success, Failure> { taskCreator() }
 }

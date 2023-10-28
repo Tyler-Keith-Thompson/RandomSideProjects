@@ -9,23 +9,23 @@ import Foundation
 
 extension Workers {
     struct Retry<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, retries: UInt) where Failure == Error, U.Success == Success, U.Failure == Failure {
-            guard retries > 0 else { taskCreator = upstream.taskCreator; return }
-            taskCreator = {
+            guard retries > 0 else { state = upstream.state; return }
+            state = TaskState {
                 Task(priority: priority) {
                     for _ in 0..<retries {
                         try Task.checkCancellation()
                         do {
-                            return try await upstream.taskCreator().value
+                            return try await upstream.createTask().value
                         } catch {
                             continue
                         }
                     }
                     
                     try Task.checkCancellation()
-                    return try await upstream.taskCreator().value
+                    return try await upstream.createTask().value
                 }
             }
         }

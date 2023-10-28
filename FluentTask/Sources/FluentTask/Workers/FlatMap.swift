@@ -9,20 +9,20 @@ import Foundation
 
 extension Workers {
     struct FlatMap<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) where Failure == Error {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    try await transform(upstream.taskCreator().value)
+                    try await transform(upstream.createTask().value)
                 }
             }
         }
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) where Failure == Never, U.Failure == Never {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    await transform(await upstream.taskCreator().value)
+                    await transform(await upstream.createTask().value)
                 }
             }
         }

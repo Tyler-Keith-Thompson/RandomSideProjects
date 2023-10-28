@@ -10,12 +10,12 @@ import Foundation
 extension Workers {
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     struct Delay<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork, C: Clock>(priority: TaskPriority?, upstream: U, duration: C.Instant.Duration, tolerance: C.Instant.Duration?, clock: C) where Failure == Error, U.Success == Success, U.Failure == Failure {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    let val = try await upstream.taskCreator().value
+                    let val = try await upstream.createTask().value
                     try await Task.sleep(for: duration, tolerance: tolerance, clock: clock)
                     return val
                 }

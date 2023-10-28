@@ -8,12 +8,12 @@
 import Foundation
 extension Workers {
     struct Timeout<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, duration: Measurement<UnitDuration>) where Failure == Error, U.Success == Success, U.Failure == Failure {
-            taskCreator = {
+            state = TaskState {
                 let task = Task {
-                    let taskResult = try await upstream.taskCreator().value
+                    let taskResult = try await upstream.createTask().value
                     try Task.checkCancellation()
                     return taskResult
                 }

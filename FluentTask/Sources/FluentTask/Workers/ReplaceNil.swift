@@ -8,12 +8,12 @@
 import Foundation
 extension Workers {
     struct ReplaceNil<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, newValue: Success) where U.Success == Success?, U.Failure == Failure, Failure == Error {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    if let val = try await upstream.taskCreator().value {
+                    if let val = try await upstream.createTask().value {
                         return val
                     } else {
                         return newValue

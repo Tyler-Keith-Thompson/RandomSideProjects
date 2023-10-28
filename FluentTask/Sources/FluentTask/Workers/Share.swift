@@ -9,11 +9,11 @@ import Foundation
 
 extension Workers {
     actor Share<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        private lazy var task = taskCreator()
+        let state: TaskState<Success, Failure>
+        private lazy var task = state.createTask()
         
         init<U: AsynchronousUnitOfWork>(upstream: U) where U.Success == Success, U.Failure == Failure {
-            taskCreator = upstream.taskCreator
+            state = upstream.state
         }
         
         public var result: Result<Success, Failure> {

@@ -9,13 +9,13 @@ import Foundation
 
 extension Workers {
     struct Catch<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (U.Failure) async throws -> Success) where Failure == Error, U.Success == Success, U.Failure == Failure {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
                     do {
-                        return try await upstream.taskCreator().value
+                        return try await upstream.createTask().value
                     } catch {
                         return try await handler(error)
                     }

@@ -10,12 +10,12 @@ import Foundation
 extension Workers {
     struct Map<Success: Sendable>: AsynchronousUnitOfWork {
         typealias Failure = Error
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    await transform(try await upstream.taskCreator().value)
+                    await transform(try await upstream.createTask().value)
                 }
             }
         }
@@ -23,12 +23,12 @@ extension Workers {
     
     struct TryMap<Success: Sendable>: AsynchronousUnitOfWork {
         typealias Failure = Error
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    try await transform(await upstream.taskCreator().value)
+                    try await transform(await upstream.createTask().value)
                 }
             }
         }

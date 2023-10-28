@@ -9,23 +9,23 @@ import Foundation
 
 extension Workers {
     struct Zip<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, downstream: D) where U.Failure == D.Failure, Failure == U.Failure, Success == (U.Success, D.Success), Failure == Error {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = try await upstream.taskCreator().value
-                    async let d = try await downstream.taskCreator().value
+                    async let u = try await upstream.createTask().value
+                    async let d = try await downstream.createTask().value
                     return (try await u, try await d)
                 }
             }
         }
 
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, downstream: D) where U.Failure == D.Failure, Failure == U.Failure, Success == (U.Success, D.Success), Failure == Never {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = await upstream.taskCreator().value
-                    async let d = await downstream.taskCreator().value
+                    async let u = await upstream.createTask().value
+                    async let d = await downstream.createTask().value
                     return (await u, await d)
                 }
             }
@@ -33,25 +33,25 @@ extension Workers {
     }
     
     struct Zip3<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, d0: D0, d1: D1) where U.Failure == D0.Failure, D0.Failure == D1.Failure, Failure == U.Failure, Success == (U.Success, D0.Success, D1.Success), Failure == Error {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = try await upstream.taskCreator().value
-                    async let d_0 = try await d0.taskCreator().value
-                    async let d_1 = try await d1.taskCreator().value
+                    async let u = try await upstream.createTask().value
+                    async let d_0 = try await d0.createTask().value
+                    async let d_1 = try await d1.createTask().value
                     return (try await u, try await d_0, try await d_1)
                 }
             }
         }
 
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, d0: D0, d1: D1) where U.Failure == D0.Failure, D0.Failure == D1.Failure, Failure == U.Failure, Success == (U.Success, D0.Success, D1.Success), Failure == Never {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = await upstream.taskCreator().value
-                    async let d_0 = await d0.taskCreator().value
-                    async let d_1 = await d1.taskCreator().value
+                    async let u = await upstream.createTask().value
+                    async let d_0 = await d0.createTask().value
+                    async let d_1 = await d1.createTask().value
                     return (await u, await d_0, await d_1)
                 }
             }
@@ -59,27 +59,27 @@ extension Workers {
     }
     
     struct Zip4<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let taskCreator: @Sendable () -> Task<Success, Failure>
-        
+        let state: TaskState<Success, Failure>
+
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork, D2: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, d0: D0, d1: D1, d2: D2) where U.Failure == D0.Failure, D0.Failure == D1.Failure, D1.Failure == D2.Failure, Failure == U.Failure, Success == (U.Success, D0.Success, D1.Success, D2.Success), Failure == Error {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = try await upstream.taskCreator().value
-                    async let d_0 = try await d0.taskCreator().value
-                    async let d_1 = try await d1.taskCreator().value
-                    async let d_2 = try await d2.taskCreator().value
+                    async let u = try await upstream.createTask().value
+                    async let d_0 = try await d0.createTask().value
+                    async let d_1 = try await d1.createTask().value
+                    async let d_2 = try await d2.createTask().value
                     return (try await u, try await d_0, try await d_1, try await d_2)
                 }
             }
         }
 
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork, D2: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, d0: D0, d1: D1, d2: D2) where U.Failure == D0.Failure, D0.Failure == D1.Failure, D1.Failure == D2.Failure, Failure == U.Failure, Success == (U.Success, D0.Success, D1.Success, D2.Success), Failure == Never {
-            taskCreator = {
+            state = TaskState {
                 Task(priority: priority) {
-                    async let u = await upstream.taskCreator().value
-                    async let d_0 = await d0.taskCreator().value
-                    async let d_1 = await d1.taskCreator().value
-                    async let d_2 = await d2.taskCreator().value
+                    async let u = await upstream.createTask().value
+                    async let d_0 = await d0.createTask().value
+                    async let d_1 = await d1.createTask().value
+                    async let d_2 = await d2.createTask().value
                     return (await u, await d_0, await d_1, await d_2)
                 }
             }
