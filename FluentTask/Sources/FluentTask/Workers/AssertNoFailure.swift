@@ -8,16 +8,20 @@
 import Foundation
 
 extension Workers {
-    struct AssertNoFailure<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let state: TaskState<Success, Failure>
+    struct AssertNoFailure<Success: Sendable>: AsynchronousUnitOfWork {
+        let state: TaskState<Success>
         
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U) where Failure == Error, U.Success == Success, U.Failure == Failure {
+        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U) where U.Success == Success {
             state = TaskState {
                 Task(priority: priority) {
                     do {
-                        return try await upstream.createTask().value
+                        let val = try await upstream.createTask().value
+                        try Task.checkCancellation()
+                        return val
                     } catch {
-                        assertionFailure("Expected no error in asynchronous unit of work, but got: \(error)")
+                        if !(error is CancellationError) {
+                            assertionFailure("Expected no error in asynchronous unit of work, but got: \(error)")
+                        }
                         throw error
                     }
                 }
@@ -26,8 +30,8 @@ extension Workers {
     }
 }
 
-extension AsynchronousUnitOfWork where Failure == Error {
-    public func assertNoFailure(priority: TaskPriority? = nil) -> some AsynchronousUnitOfWork<Success, Failure> where Failure == Error {
+extension AsynchronousUnitOfWork {
+    public func assertNoFailure(priority: TaskPriority? = nil) -> some AsynchronousUnitOfWork<Success> {
         Workers.AssertNoFailure(priority: priority, upstream: self)
     }
 }

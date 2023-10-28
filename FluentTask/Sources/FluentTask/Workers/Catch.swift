@@ -8,16 +8,24 @@
 import Foundation
 
 extension Workers {
-    struct Catch<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let state: TaskState<Success, Failure>
+    struct Catch<Success: Sendable>: AsynchronousUnitOfWork {
+        let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (U.Failure) async throws -> Success) where Failure == Error, U.Success == Success, U.Failure == Failure {
+        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) where U.Success == Success {
             state = TaskState {
                 Task(priority: priority) {
                     do {
-                        return try await upstream.createTask().value
+                        let val = try await upstream.createTask().value
+                        try Task.checkCancellation()
+                        return val
                     } catch {
-                        return try await handler(error)
+                        if error is CancellationError {
+                            throw error
+                        } else {
+                            let val = try await handler(error)
+                            try Task.checkCancellation()
+                            return val
+                        }
                     }
                 }
             }
@@ -25,12 +33,12 @@ extension Workers {
     }
 }
 
-extension AsynchronousUnitOfWork where Failure == Error {
-    public func `catch`(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Failure) async throws -> Success) -> some AsynchronousUnitOfWork<Success, Failure> {
+extension AsynchronousUnitOfWork {
+    public func `catch`(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
         Workers.Catch(priority: priority, upstream: self, handler)
     }
     
-    public func tryCatch(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Failure) async throws -> Success) -> some AsynchronousUnitOfWork<Success, Failure> {
+    public func tryCatch(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) -> some AsynchronousUnitOfWork<Success> {
         Workers.Catch(priority: priority, upstream: self, handler)
     }
 }

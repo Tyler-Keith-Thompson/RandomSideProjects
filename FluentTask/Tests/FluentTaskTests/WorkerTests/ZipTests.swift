@@ -11,9 +11,9 @@ import XCTest
 
 final class ZipTests: XCTestCase {
     func testZipCombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
+        let t1 = DeferredTask<Int> { 1 }
         
-        let t2 = DeferredTask<String, Error> { "A" }
+        let t2 = DeferredTask<String> { "A" }
         let t3 = t2.zip(t1)
         let val = try await t3.result.get() // Steak sauce!!!
         XCTAssertEqual(val.0, "A")
@@ -31,9 +31,9 @@ final class ZipTests: XCTestCase {
     }
     
     func testZipTransformCombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
+        let t1 = DeferredTask<Int> { 1 }
         
-        let t2 = DeferredTask<String, Error> { "A" }
+        let t2 = DeferredTask<String> { "A" }
         let t3 = t2.zip(t1) { $0 + String(describing: $1) }
         let val = try await t3.result.get() // Steak sauce!!!
         XCTAssertEqual(val, "A1")
@@ -49,9 +49,9 @@ final class ZipTests: XCTestCase {
     }
     
     func testZip3CombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
-        let t2 = DeferredTask<String, Error> { "A" }
-        let t3 = DeferredTask<Bool, Error> { true }
+        let t1 = DeferredTask<Int> { 1 }
+        let t2 = DeferredTask<String> { "A" }
+        let t3 = DeferredTask<Bool> { true }
         
         let t4 = t2.zip(t1, t3)
         let val = try await t4.result.get() // Steak sauce!!!
@@ -73,9 +73,9 @@ final class ZipTests: XCTestCase {
     }
     
     func testZip3TransformCombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
-        let t2 = DeferredTask<String, Error> { "A" }
-        let t3 = DeferredTask<Bool, Error> { true }
+        let t1 = DeferredTask<Int> { 1 }
+        let t2 = DeferredTask<String> { "A" }
+        let t3 = DeferredTask<Bool> { true }
         
         let t4 = t2.zip(t1, t3) { $0 + String(describing: $1) + String(describing: $2) }
         let val = try await t4.result.get() // Steak sauce!!!
@@ -93,10 +93,10 @@ final class ZipTests: XCTestCase {
     }
     
     func testZip4CombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
-        let t2 = DeferredTask<String, Error> { "A" }
-        let t3 = DeferredTask<Bool, Error> { true }
-        let t4 = DeferredTask<Character, Error> { Character("!") }
+        let t1 = DeferredTask<Int> { 1 }
+        let t2 = DeferredTask<String> { "A" }
+        let t3 = DeferredTask<Bool> { true }
+        let t4 = DeferredTask<Character> { Character("!") }
 
         let t5 = t2.zip(t1, t3, t4)
         let val = try await t5.result.get() // Steak sauce!!!
@@ -121,10 +121,10 @@ final class ZipTests: XCTestCase {
     }
     
     func testZip4TransformCombinesTasks_WithExplicitFailure() async throws {
-        let t1 = DeferredTask<Int, Error> { 1 }
-        let t2 = DeferredTask<String, Error> { "A" }
-        let t3 = DeferredTask<Bool, Error> { true }
-        let t4 = DeferredTask<Character, Error> { Character("!") }
+        let t1 = DeferredTask<Int> { 1 }
+        let t2 = DeferredTask<String> { "A" }
+        let t3 = DeferredTask<Bool> { true }
+        let t4 = DeferredTask<Character> { Character("!") }
 
         let t5 = t2.zip(t1, t3, t4) { $0 + String(describing: $1) + String(describing: $2) + String(describing: $3) }
         let val = try await t5.result.get() // Steak sauce!!!

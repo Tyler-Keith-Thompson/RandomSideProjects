@@ -8,10 +8,10 @@
 import Foundation
 
 extension Workers {
-    struct Retry<Success: Sendable, Failure: Error>: AsynchronousUnitOfWork {
-        let state: TaskState<Success, Failure>
+    struct Retry<Success: Sendable>: AsynchronousUnitOfWork {
+        let state: TaskState<Success>
 
-        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, retries: UInt) where Failure == Error, U.Success == Success, U.Failure == Failure {
+        init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, retries: UInt) where U.Success == Success {
             guard retries > 0 else { state = upstream.state; return }
             state = TaskState {
                 Task(priority: priority) {
@@ -32,8 +32,8 @@ extension Workers {
     }
 }
 
-extension AsynchronousUnitOfWork where Failure == Error {
-    public func retry(priority: TaskPriority? = nil, _ retries: UInt = 1) -> some AsynchronousUnitOfWork<Success, Failure> {
+extension AsynchronousUnitOfWork {
+    public func retry(priority: TaskPriority? = nil, _ retries: UInt = 1) -> some AsynchronousUnitOfWork<Success> {
         Workers.Retry(priority: priority, upstream: self, retries: retries)
     }
 }
