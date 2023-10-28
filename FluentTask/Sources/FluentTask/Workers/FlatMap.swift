@@ -13,10 +13,7 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> D) where Success == D.Success {
             state = TaskState {
-                try Task.checkCancellation()
-                let val = try await upstream.operation()
-                try Task.checkCancellation()
-                return try await transform(val).operation()
+                try await transform(try await upstream.operation()).operation()
             }
         }
     }

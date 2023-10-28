@@ -20,9 +20,7 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork, D: TopLevelDecoder>(upstream: U, decoder: D) where U.Success == D.Input {
             state = TaskState {
-                let val = try await upstream.operation()
-                try Task.checkCancellation()
-                return try decoder.decode(Success.self, from: val)
+                try decoder.decode(Success.self, from: try await upstream.operation())
             }
         }
     }

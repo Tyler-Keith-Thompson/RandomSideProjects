@@ -15,7 +15,6 @@ extension Workers {
             guard retries > 0 else { state = upstream.state; return }
             state = TaskState {
                 for _ in 0..<retries {
-                    try Task.checkCancellation()
                     do {
                         return try await upstream.operation()
                     } catch {
@@ -23,7 +22,6 @@ extension Workers {
                     }
                 }
                 
-                try Task.checkCancellation()
                 return try await upstream.operation()
             }
         }

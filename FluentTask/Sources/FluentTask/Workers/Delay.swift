@@ -15,7 +15,6 @@ extension Workers {
         init<U: AsynchronousUnitOfWork, C: Clock>(upstream: U, duration: C.Instant.Duration, tolerance: C.Instant.Duration?, clock: C) where U.Success == Success {
             state = TaskState {
                 let val = try await upstream.operation()
-                try Task.checkCancellation()
                 try await Task.sleep(for: duration, tolerance: tolerance, clock: clock)
                 return val
             }

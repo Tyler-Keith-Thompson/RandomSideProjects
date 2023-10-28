@@ -1,4 +1,5 @@
 import XCTest
+import Combine
 @testable import FluentTask
 
 final class FluentTaskTests: XCTestCase {

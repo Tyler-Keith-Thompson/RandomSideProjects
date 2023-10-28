@@ -13,9 +13,7 @@ extension Workers {
         init<U: AsynchronousUnitOfWork>(upstream: U, duration: Measurement<UnitDuration>) where U.Success == Success {
             state = TaskState {
                 let task = Task {
-                    let taskResult = try await upstream.operation()
-                    try Task.checkCancellation()
-                    return taskResult
+                    try await upstream.operation()
                 }
                 
                 let timeoutTask = Task {
@@ -24,9 +22,7 @@ extension Workers {
                 }
                 
                 return try await Task {
-                    try Task.checkCancellation()
                     let result = try await task.value
-                    try Task.checkCancellation()
                     timeoutTask.cancel()
                     return result
                 }.value

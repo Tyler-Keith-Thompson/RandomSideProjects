@@ -13,12 +13,9 @@ extension Workers {
         
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(upstream: U, downstream: D) where Success == (U.Success, D.Success) {
             state = TaskState {
-                try Task.checkCancellation()
                 async let u = try await upstream.operation()
                 async let d = try await downstream.operation()
-                let returnVal = (try await u, try await d)
-                try Task.checkCancellation()
-                return returnVal
+                return (try await u, try await d)
             }
         }
     }
@@ -28,14 +25,11 @@ extension Workers {
         
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork>(upstream: U, d0: D0, d1: D1) where Success == (U.Success, D0.Success, D1.Success) {
             state = TaskState {
-                try Task.checkCancellation()
                 async let u = try await upstream.operation()
                 async let d_0 = try await d0.operation()
                 async let d_1 = try await d1.operation()
                 
-                let returnVal = (try await u, try await d_0, try await d_1)
-                try Task.checkCancellation()
-                return returnVal
+                return (try await u, try await d_0, try await d_1)
             }
         }
     }
@@ -45,15 +39,12 @@ extension Workers {
         
         init<U: AsynchronousUnitOfWork, D0: AsynchronousUnitOfWork, D1: AsynchronousUnitOfWork, D2: AsynchronousUnitOfWork>(upstream: U, d0: D0, d1: D1, d2: D2) where Success == (U.Success, D0.Success, D1.Success, D2.Success) {
             state = TaskState {
-                try Task.checkCancellation()
                 async let u = try await upstream.operation()
                 async let d_0 = try await d0.operation()
                 async let d_1 = try await d1.operation()
                 async let d_2 = try await d2.operation()
                 
-                let returnVal = (try await u, try await d_0, try await d_1, try await d_2)
-                try Task.checkCancellation()
-                return returnVal
+                return (try await u, try await d_0, try await d_1, try await d_2)
             }
         }
     }

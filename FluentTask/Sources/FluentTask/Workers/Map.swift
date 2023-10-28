@@ -13,9 +13,7 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) {
             state = TaskState {
-                let val = try await upstream.operation()
-                try Task.checkCancellation()
-                return await transform(val)
+                await transform(try await upstream.operation())
             }
         }
     }
@@ -25,10 +23,7 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) {
             state = TaskState {
-                try Task.checkCancellation()
-                let val = try await upstream.operation()
-                try Task.checkCancellation()
-                return try await transform(val)
+                try await transform(try await upstream.operation())
             }
         }
     }

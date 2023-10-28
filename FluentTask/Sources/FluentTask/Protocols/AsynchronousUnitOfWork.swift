@@ -49,19 +49,16 @@ public class TaskState<Success: Sendable>: @unchecked Sendable {
     }
     
     func createOperation() -> @Sendable () async throws -> Success {
-        { [isCancelled, operation] in
-            guard !isCancelled else { throw CancellationError() }
-            return try await operation()
+        { [operation] in
+            try Task.checkCancellation()
+            let success = try await operation()
+            try Task.checkCancellation()
+            return success
         }
     }
     
     @discardableResult func createTask() -> Task<Success, Error> {
-        let task = Task {
-            try Task.checkCancellation()
-            let val = try await operation()
-            try Task.checkCancellation()
-            return val
-        }
+        let task = Task { try await operation() }
         lock.lock()
         tasks.append(task)
         lock.unlock()

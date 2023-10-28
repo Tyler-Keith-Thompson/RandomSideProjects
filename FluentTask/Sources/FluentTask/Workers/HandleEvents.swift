@@ -16,7 +16,6 @@ extension Workers {
                 try await withTaskCancellationHandler {
                     do {
                         let val = try await upstream.operation()
-                        try Task.checkCancellation()
                         try await receiveOutput?(val)
                         return val
                     } catch {

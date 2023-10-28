@@ -14,9 +14,7 @@ extension Workers {
         init<U: AsynchronousUnitOfWork>(upstream: U) where U.Success == Success {
             state = TaskState {
                 do {
-                    let val = try await upstream.operation()
-                    try Task.checkCancellation()
-                    return val
+                    return try await upstream.operation()
                 } catch {
                     if !(error is CancellationError) {
                         assertionFailure("Expected no error in asynchronous unit of work, but got: \(error)")

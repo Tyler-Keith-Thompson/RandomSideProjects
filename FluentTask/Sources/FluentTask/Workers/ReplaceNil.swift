@@ -13,10 +13,8 @@ extension Workers {
         init<U: AsynchronousUnitOfWork>(upstream: U, newValue: Success) where U.Success == Success? {
             state = TaskState {
                 if let val = try await upstream.operation() {
-                    try Task.checkCancellation()
                     return val
                 } else {
-                    try Task.checkCancellation()
                     return newValue
                 }
             }
