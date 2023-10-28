@@ -13,12 +13,10 @@ final class DelayTests: XCTestCase {
     func testAssertNoFailureDoesNotThrowIfThereIsNoFailure() throws {
         let exp = self.expectation(description: "thing happened")
         let date = Date()
-        DeferredTask {
-            
-        }
-        .delay(for: .milliseconds(10))
-        .map { _ in exp.fulfill() }
-        .execute()
+        DeferredTask { }
+            .delay(for: .milliseconds(10))
+            .map { _ in exp.fulfill() }
+            .execute()
 
         self.wait(for: [exp], timeout: 0.02)
         XCTAssert(Date().timeIntervalSince(date) > Measurement<UnitDuration>(value: 10, unit: .milliseconds).converted(to: .seconds).value)
