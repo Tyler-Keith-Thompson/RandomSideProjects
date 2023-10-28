@@ -27,7 +27,7 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func assertNoFailure(priority: TaskPriority? = nil) -> some AsynchronousUnitOfWork<Success> {
+    public func assertNoFailure() -> some AsynchronousUnitOfWork<Success> {
         Workers.AssertNoFailure(upstream: self)
     }
 }
