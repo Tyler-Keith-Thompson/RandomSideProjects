@@ -18,4 +18,13 @@ final class RepalceNilTests: XCTestCase {
         
         XCTAssertEqual(val, 0)
     }
+    
+    func testReplaceNilDoesNotTransformValue_IfValueExists() async throws {
+        let val = try await DeferredTask { 1 as Int? }
+            .replaceNil(with: 0)
+            .result
+            .get()
+        
+        XCTAssertEqual(val, 1)
+    }
 }
