@@ -13,11 +13,9 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async -> Success) {
             state = TaskState {
-                Task(priority: priority) {
-                    let val = try await upstream.createTask().value
-                    try Task.checkCancellation()
-                    return await transform(val)
-                }
+                let val = try await upstream.operation()
+                try Task.checkCancellation()
+                return await transform(val)
             }
         }
     }
@@ -27,12 +25,10 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (U.Success) async throws -> Success) {
             state = TaskState {
-                Task(priority: priority) {
-                    try Task.checkCancellation()
-                    let val = try await upstream.createTask().value
-                    try Task.checkCancellation()
-                    return try await transform(val)
-                }
+                try Task.checkCancellation()
+                let val = try await upstream.operation()
+                try Task.checkCancellation()
+                return try await transform(val)
             }
         }
     }

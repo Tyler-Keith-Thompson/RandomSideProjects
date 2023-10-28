@@ -14,12 +14,10 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork, C: Clock>(priority: TaskPriority?, upstream: U, duration: C.Instant.Duration, tolerance: C.Instant.Duration?, clock: C) where U.Success == Success {
             state = TaskState {
-                Task(priority: priority) {
-                    let val = try await upstream.createTask().value
-                    try Task.checkCancellation()
-                    try await Task.sleep(for: duration, tolerance: tolerance, clock: clock)
-                    return val
-                }
+                let val = try await upstream.operation()
+                try Task.checkCancellation()
+                try await Task.sleep(for: duration, tolerance: tolerance, clock: clock)
+                return val
             }
         }
     }

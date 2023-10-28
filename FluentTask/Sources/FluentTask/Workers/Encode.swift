@@ -20,11 +20,9 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork, E: TopLevelEncoder>(priority: TaskPriority?, upstream: U, encoder: E) where Success == E.Output, U.Success: Encodable {
             state = TaskState {
-                Task(priority: priority) {
-                    let val = try await upstream.createTask().value
-                    try Task.checkCancellation()
-                    return try encoder.encode(val)
-                }
+                let val = try await upstream.operation()
+                try Task.checkCancellation()
+                return try encoder.encode(val)
             }
         }
     }

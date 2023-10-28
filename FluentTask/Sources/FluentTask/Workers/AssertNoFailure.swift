@@ -13,17 +13,15 @@ extension Workers {
         
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U) where U.Success == Success {
             state = TaskState {
-                Task(priority: priority) {
-                    do {
-                        let val = try await upstream.createTask().value
-                        try Task.checkCancellation()
-                        return val
-                    } catch {
-                        if !(error is CancellationError) {
-                            assertionFailure("Expected no error in asynchronous unit of work, but got: \(error)")
-                        }
-                        throw error
+                do {
+                    let val = try await upstream.operation()
+                    try Task.checkCancellation()
+                    return val
+                } catch {
+                    if !(error is CancellationError) {
+                        assertionFailure("Expected no error in asynchronous unit of work, but got: \(error)")
                     }
+                    throw error
                 }
             }
         }

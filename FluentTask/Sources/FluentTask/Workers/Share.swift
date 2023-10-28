@@ -24,10 +24,7 @@ extension Workers {
         
         nonisolated public func execute() throws {
             guard !state.isCancelled else { throw CancellationError() }
-            Task {
-                try Task.checkCancellation()
-                return await task
-            }
+            Task { try await task.value }
         }
     }
 }

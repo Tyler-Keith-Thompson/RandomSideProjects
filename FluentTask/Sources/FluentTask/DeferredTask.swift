@@ -12,8 +12,6 @@ public struct DeferredTask<Success: Sendable>: AsynchronousUnitOfWork {
     public let state: TaskState<Success>
 
     public init(priority: TaskPriority? = nil, @_inheritActorContext @_implicitSelfCapture operation: @escaping @Sendable () async throws -> Success) {
-        state = TaskState {
-            Task(priority: priority, operation: operation)
-        }
+        state = TaskState(operation: operation)
     }
 }

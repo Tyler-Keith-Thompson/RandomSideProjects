@@ -13,19 +13,17 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, @_inheritActorContext @_implicitSelfCapture _ handler: @escaping @Sendable (Error) async throws -> Success) where U.Success == Success {
             state = TaskState {
-                Task(priority: priority) {
-                    do {
-                        let val = try await upstream.createTask().value
+                do {
+                    let val = try await upstream.operation()
+                    try Task.checkCancellation()
+                    return val
+                } catch {
+                    if error is CancellationError {
+                        throw error
+                    } else {
+                        let val = try await handler(error)
                         try Task.checkCancellation()
                         return val
-                    } catch {
-                        if error is CancellationError {
-                            throw error
-                        } else {
-                            let val = try await handler(error)
-                            try Task.checkCancellation()
-                            return val
-                        }
                     }
                 }
             }

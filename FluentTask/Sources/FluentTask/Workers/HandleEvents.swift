@@ -13,23 +13,21 @@ extension Workers {
 
         init<U: AsynchronousUnitOfWork>(priority: TaskPriority?, upstream: U, receiveOutput: ((Success) async throws -> Void)?, receiveError: ((Error) async throws -> Void)?, receiveCancel: (() async throws -> Void)?) where U.Success == Success {
             state = TaskState {
-                Task(priority: priority) {
-                    try await withTaskCancellationHandler {
-                        do {
-                            let val = try await upstream.createTask().value
-                            try Task.checkCancellation()
-                            try await receiveOutput?(val)
-                            return val
-                        } catch {
-                            if !(error is CancellationError) {
-                                try await receiveError?(error)
-                            }
-                            throw error
+                try await withTaskCancellationHandler {
+                    do {
+                        let val = try await upstream.operation()
+                        try Task.checkCancellation()
+                        try await receiveOutput?(val)
+                        return val
+                    } catch {
+                        if !(error is CancellationError) {
+                            try await receiveError?(error)
                         }
-                    } onCancel: {
-                        if let receiveCancel {
-                            Task { try await receiveCancel() }
-                        }
+                        throw error
+                    }
+                } onCancel: {
+                    if let receiveCancel {
+                        Task { try await receiveCancel() }
                     }
                 }
             }

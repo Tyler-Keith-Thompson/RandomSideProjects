@@ -15,27 +15,28 @@ extension AsynchronousUnitOfWork {
     public var result: Result<Success, Error> {
         get async throws {
             guard !state.isCancelled else { throw CancellationError() }
-            return await createTask().result
+            return await state.createTask().result
         }
     }
     
     public func execute() throws {
         guard !state.isCancelled else { throw CancellationError() }
-        createTask()
+        state.createTask()
     }
     
     public func cancel() {
         state.cancel()
     }
     
-    // deliberately internal
-    @discardableResult func createTask() -> Task<Success, Error> { state.createTask() }
+    var operation: @Sendable () async throws -> Success {
+        state.createOperation()
+    }
 }
 
 public class TaskState<Success: Sendable>: @unchecked Sendable {
     let lock = NSRecursiveLock()
-    var tasks: [Task<Success, Error>] = []
-    let taskCreator: @Sendable () -> Task<Success, Error>
+    var tasks = [Task<Success, Error>]()
+    let operation: @Sendable () async throws -> Success
     
     private let _isCancelled = ManagedAtomic<Bool>(false)
     
@@ -43,19 +44,27 @@ public class TaskState<Success: Sendable>: @unchecked Sendable {
         _isCancelled.load(ordering: .sequentiallyConsistent)
     }
     
-    init(taskCreator: @Sendable @escaping () -> Task<Success, Error>) {
-        self.taskCreator = taskCreator
+    init(operation: @Sendable @escaping () async throws -> Success) {
+        self.operation = operation
     }
     
-    func createTask() -> Task<Success, Error> {
-        let task = taskCreator()
-        if !isCancelled {
-            lock.lock()
-            tasks.append(task)
-            lock.unlock()
-        } else {
-            task.cancel()
+    func createOperation() -> @Sendable () async throws -> Success {
+        { [isCancelled, operation] in
+            guard !isCancelled else { throw CancellationError() }
+            return try await operation()
         }
+    }
+    
+    @discardableResult func createTask() -> Task<Success, Error> {
+        let task = Task {
+            try Task.checkCancellation()
+            let val = try await operation()
+            try Task.checkCancellation()
+            return val
+        }
+        lock.lock()
+        tasks.append(task)
+        lock.unlock()
         return task
     }
     
