@@ -33,10 +33,10 @@ extension AsynchronousUnitOfWork {
     }
 }
 
-public class TaskState<Success: Sendable>: @unchecked Sendable {
+public final class TaskState<Success: Sendable>: @unchecked Sendable {
     let lock = NSRecursiveLock()
     var tasks = [Task<Success, Error>]()
-    let operation: @Sendable () async throws -> Success
+    var operation: @Sendable () async throws -> Success
     
     private let _isCancelled = ManagedAtomic<Bool>(false)
     
@@ -46,6 +46,20 @@ public class TaskState<Success: Sendable>: @unchecked Sendable {
     
     init(operation: @Sendable @escaping () async throws -> Success) {
         self.operation = operation
+    }
+    
+    static func unsafeCreation() -> TaskState<Success> {
+        TaskState<Success>()
+    }
+    
+    private init() {
+        self.operation = { fatalError("Runtime contract violated, task state never set up") }
+    }
+    
+    func setOperation(operation: @Sendable @escaping () async throws -> Success) {
+        lock.lock()
+        self.operation = operation
+        lock.unlock()
     }
     
     func createOperation() -> @Sendable () async throws -> Success {

@@ -7,45 +7,69 @@
 
 import Foundation
 extension Workers {
-    struct RetryAfterFlatMapping<Success: Sendable>: AsynchronousUnitOfWork {
+    actor RetryAfterFlatMapping<Success>: AsynchronousUnitOfWork {
+        var retryCount: UInt
+
         let state: TaskState<Success>
 
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork>(upstream: U, retries: UInt, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (Error) async throws -> D) where U.Success == Success {
-            guard retries > 0 else { state = upstream.state; return }
-            state = TaskState {
-                for _ in 0..<retries {
+            retryCount = retries
+            guard retries > 0 else {
+                state = upstream.state
+                return
+            }
+            state = TaskState<Success>.unsafeCreation()
+            state.setOperation { [weak self] in
+                guard let self else { throw CancellationError() }
+                while await retryCount > 0 {
                     do {
                         return try await upstream.operation()
                     } catch {
                         _ = try await transform(error).operation()
+                        await decrementRetry()
                         continue
                     }
                 }
-                
                 return try await upstream.operation()
             }
         }
+        
+        func decrementRetry() {
+            retryCount -= 1
+        }
     }
     
-    struct RetryOnAfterFlatMapping<Success: Sendable>: AsynchronousUnitOfWork {
+    actor RetryOnAfterFlatMapping<Success>: AsynchronousUnitOfWork {
+        var retryCount: UInt
+
         let state: TaskState<Success>
 
         init<U: AsynchronousUnitOfWork, D: AsynchronousUnitOfWork, E: Error & Equatable>(upstream: U, retries: UInt, error: E, @_inheritActorContext @_implicitSelfCapture transform: @escaping @Sendable (Error) async throws -> D) where U.Success == Success {
-            guard retries > 0 else { state = upstream.state; return }
-            state = TaskState {
-                for _ in 0..<retries {
+            retryCount = retries
+            guard retries > 0 else {
+                state = upstream.state
+                return
+            }
+            state = TaskState<Success>.unsafeCreation()
+            state.setOperation { [weak self] in
+                guard let self else { throw CancellationError() }
+                while await retryCount > 0 {
                     do {
                         return try await upstream.operation()
                     } catch(let err) {
                         guard let unwrappedError = (err as? E),
                               unwrappedError == error else { throw err }
                         _ = try await transform(error).operation()
+                        await decrementRetry()
                         continue
                     }
                 }
-                
                 return try await upstream.operation()
             }
+        }
+        
+        func decrementRetry() {
+            retryCount -= 1
         }
     }
 }

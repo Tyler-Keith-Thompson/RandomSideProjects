@@ -7,25 +7,35 @@
 
 import Foundation
 
-// TODO: Write a test to ensure multiple retry operators behave as expected
-// There's a chance this needs to be changed to an actor that keeps track of how many retries were performed
 extension Workers {
-    struct Retry<Success: Sendable>: AsynchronousUnitOfWork {
+    actor Retry<Success>: AsynchronousUnitOfWork {
+        var retryCount: UInt
+
         let state: TaskState<Success>
 
         init<U: AsynchronousUnitOfWork>(upstream: U, retries: UInt) where U.Success == Success {
-            guard retries > 0 else { state = upstream.state; return }
-            state = TaskState {
-                for _ in 0..<retries {
+            retryCount = retries
+            guard retries > 0 else {
+                state = upstream.state
+                return
+            }
+            state = TaskState<Success>.unsafeCreation()
+            state.setOperation { [weak self] in
+                guard let self else { throw CancellationError() }
+                while await retryCount > 0 {
                     do {
                         return try await upstream.operation()
                     } catch {
+                        await decrementRetry()
                         continue
                     }
                 }
-                
                 return try await upstream.operation()
             }
+        }
+        
+        func decrementRetry() {
+            retryCount -= 1
         }
     }
 }

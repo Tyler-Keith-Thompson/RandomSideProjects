@@ -77,6 +77,29 @@ final class RetryTests: XCTestCase {
         XCTAssertEqual(UInt(copy.count), 2)
     }
     
+    func testTaskWithMultipleRetries_OnlyRetriesTheSpecifiedNumberOfTimes() async throws {
+        actor Test {
+            var arr = [String]()
+            func append(_ str: String) {
+                arr.append(str)
+            }
+        }
+        
+        let test = Test()
+        
+        let t = DeferredTask {
+            await test.append("called")
+        }
+        .tryMap { _ in throw URLError(.badURL) }
+        .retry()
+        .retry()
+
+        _ = try await t.result
+        
+        let copy = await test.arr
+        XCTAssertEqual(UInt(copy.count), 3)
+    }
+    
     func testTaskCanRetryWithoutError_DoesNothing() async throws {
         actor Test {
             var arr = [String]()
