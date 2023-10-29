@@ -10,7 +10,7 @@ import Foundation
 extension Workers {
     actor Share<Success: Sendable>: AsynchronousUnitOfWork {
         let state: TaskState<Success>
-        private lazy var task = state.createTask()
+        private lazy var task = state.setLazyTask()
         
         init<U: AsynchronousUnitOfWork>(upstream: U) where U.Success == Success {
             state = upstream.state
@@ -30,5 +30,5 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
-    public func share() -> some AsynchronousUnitOfWork<Success> { Workers.Share(upstream: self) }
+    public func share() -> some AsynchronousUnitOfWork<Success> & AnyActor { Workers.Share(upstream: self) }
 }

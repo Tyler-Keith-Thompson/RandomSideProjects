@@ -36,6 +36,7 @@ extension AsynchronousUnitOfWork {
 public final class TaskState<Success: Sendable>: @unchecked Sendable {
     let lock = NSRecursiveLock()
     var tasks = [Task<Success, Error>]()
+    var lazyTask: Task<Success, Error>?
     var operation: @Sendable () async throws -> Success
     
     private let _isCancelled = ManagedAtomic<Bool>(false)
@@ -63,7 +64,18 @@ public final class TaskState<Success: Sendable>: @unchecked Sendable {
     }
     
     func createOperation() -> @Sendable () async throws -> Success {
-        { [operation] in
+        lock.lock()
+        if let lazyTask {
+            lock.unlock()
+            return { 
+                try Task.checkCancellation()
+                let success = try await lazyTask.value
+                try Task.checkCancellation()
+                return success
+            }
+        }
+        lock.unlock()
+        return { [operation] in
             try Task.checkCancellation()
             let success = try await operation()
             try Task.checkCancellation()
@@ -71,7 +83,21 @@ public final class TaskState<Success: Sendable>: @unchecked Sendable {
         }
     }
     
+    func setLazyTask() -> Task<Success, Error> {
+        let task = createTask()
+        lock.lock()
+        lazyTask = task
+        lock.unlock()
+        return task
+    }
+    
     @discardableResult func createTask() -> Task<Success, Error> {
+        lock.lock()
+        if let lazyTask {
+            lock.unlock()
+            return lazyTask
+        }
+        lock.unlock()
         let task = Task { try await operation() }
         lock.lock()
         tasks.append(task)
