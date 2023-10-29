@@ -186,8 +186,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "de1c80ad1fdff1ba772bcef6b392c3ef735f39a6",
-          "version": "1.8.0"
+          "revision": "e8000754be4dc63fea88f121bb8f1703f4a6a5af",
+          "version": "1.9.2"
         }
       },
       {
