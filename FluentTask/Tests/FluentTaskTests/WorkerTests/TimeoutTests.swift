@@ -13,8 +13,7 @@ final class TimeoutTests: XCTestCase {
     func testTaskDoesNotTimeOutIfItCompletesInTime() async throws {
         let val = try await DeferredTask { "test" }
             .timeout(.milliseconds(10))
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, "test")
     }

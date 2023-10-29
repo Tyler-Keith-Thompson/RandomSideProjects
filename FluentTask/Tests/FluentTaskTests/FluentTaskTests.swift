@@ -19,7 +19,7 @@ final class FluentTaskTests: XCTestCase {
         
         try DeferredTask {
             firedExpectation.fulfill()
-        }.execute()
+        }.run()
         
         await fulfillment(of: [firedExpectation], timeout: 0.001)
     }

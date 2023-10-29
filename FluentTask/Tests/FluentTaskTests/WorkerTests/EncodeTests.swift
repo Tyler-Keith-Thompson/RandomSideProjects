@@ -20,8 +20,7 @@ final class EncodeTests: XCTestCase {
             MyType(val: random)
         }
             .encode(encoder: JSONEncoder())
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(try JSONDecoder().decode(MyType.self, from: res).val, random)
     }

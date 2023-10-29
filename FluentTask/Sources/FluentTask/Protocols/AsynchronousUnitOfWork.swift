@@ -7,7 +7,8 @@ public protocol AsynchronousUnitOfWork<Success>: Sendable where Success: Sendabl
     var state: TaskState<Success> { get }
     var result: Result<Success, Error> { get async throws }
     
-    func execute() throws
+    func run() throws
+    @discardableResult func execute() async throws -> Success
     func cancel()
 }
 
@@ -19,9 +20,13 @@ extension AsynchronousUnitOfWork {
         }
     }
     
-    public func execute() throws {
+    public func run() throws {
         guard !state.isCancelled else { throw CancellationError() }
         state.createTask()
+    }
+    
+    @discardableResult public func execute() async throws -> Success {
+        try await result.get()
     }
     
     public func cancel() {

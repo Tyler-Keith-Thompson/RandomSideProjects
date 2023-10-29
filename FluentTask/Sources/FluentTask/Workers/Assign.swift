@@ -15,6 +15,6 @@ extension AsynchronousUnitOfWork {
     public func assign<Root: AnyObject>(to keyPath: ReferenceWritableKeyPath<Root, Success>, on object: Root) async throws {
         _ = try await handleEvents { [weak object] in
             object?[keyPath: keyPath] = $0
-        }.result.get()
+        }.execute()
     }
 }

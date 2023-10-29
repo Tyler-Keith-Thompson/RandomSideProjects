@@ -16,8 +16,7 @@ final class FlatMapTests: XCTestCase {
                 DeferredTask { val }
                     .map { String(describing: $0) }
             }
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, "1")
     }
@@ -32,7 +31,7 @@ final class FlatMapTests: XCTestCase {
         
         let test = Test()
         
-        _ = try await DeferredTask {
+        try await DeferredTask {
             try await Task.sleep(nanoseconds: 10000)
             await test.append("1")
         }.flatMap {
@@ -40,7 +39,7 @@ final class FlatMapTests: XCTestCase {
                 await test.append("2")
             }
         }
-        .result
+        .execute()
         
         let copy = await test.arr
         XCTAssertEqual(copy, ["1", "2"])
@@ -56,7 +55,7 @@ final class FlatMapTests: XCTestCase {
         
         let test = Test()
         
-        _ = try await DeferredTask {
+        try await DeferredTask {
             try! await Task.sleep(nanoseconds: 10000)
             await test.append("1")
         }.flatMap {
@@ -64,7 +63,7 @@ final class FlatMapTests: XCTestCase {
                 await test.append("2")
             }
         }
-        .result
+        .execute()
         
         let copy = await test.arr
         XCTAssertEqual(copy, ["1", "2"])

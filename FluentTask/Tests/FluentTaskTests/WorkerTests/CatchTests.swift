@@ -13,8 +13,7 @@ final class CatchTests: XCTestCase {
     func testCatchDoesNotInterfereWithNoFailure() async throws {
         let val = try await DeferredTask { 1 }
             .catch { _ in DeferredTask { 2 } }
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, 1)
     }
@@ -70,8 +69,7 @@ final class CatchTests: XCTestCase {
     func testTryCatchDoesNotInterfereWithNoFailure() async throws {
         let val = try await DeferredTask { 1 }
             .tryCatch { _ in DeferredTask { 2 } }
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, 1)
     }

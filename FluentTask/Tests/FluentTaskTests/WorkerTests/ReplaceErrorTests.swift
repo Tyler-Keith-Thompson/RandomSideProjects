@@ -13,8 +13,7 @@ final class ReplaceErrorTests: XCTestCase {
     func testReplaceErrorTransformsValue() async throws {
         let val = try await DeferredTask { throw URLError(.badURL) }
             .replaceError(with: -1)
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, -1)
     }
@@ -22,8 +21,7 @@ final class ReplaceErrorTests: XCTestCase {
     func testReplaceNilDoesNotTransformValue_IfNoErrorThrown() async throws {
         let val = try await DeferredTask { 1 }
             .replaceError(with: -1)
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, 1)
     }

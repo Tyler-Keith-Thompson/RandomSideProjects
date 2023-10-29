@@ -15,7 +15,7 @@ final class CancelTests: XCTestCase {
         exp.isInverted = true
         let task = DeferredTask { exp.fulfill() }
         task.cancel()
-        XCTAssertThrowsError(try task.execute())
+        XCTAssertThrowsError(try task.run())
 
         self.wait(for: [exp], timeout: 0.001)
     }
@@ -36,12 +36,11 @@ final class CancelTests: XCTestCase {
             await test.start()
             try await Task.sleep(for: .milliseconds(10))
         }.map {
-            print("CANCELED?: \(Task.isCancelled)")
             await test.end()
             exp.fulfill()
         }
         
-        try task.execute()
+        try task.run()
 
         try await Task.sleep(for: .milliseconds(2))
         

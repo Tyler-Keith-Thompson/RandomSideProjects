@@ -22,7 +22,7 @@ extension Workers {
             }
         }
         
-        nonisolated public func execute() throws {
+        nonisolated public func run() throws {
             guard !state.isCancelled else { throw CancellationError() }
             Task { try await task.value }
         }

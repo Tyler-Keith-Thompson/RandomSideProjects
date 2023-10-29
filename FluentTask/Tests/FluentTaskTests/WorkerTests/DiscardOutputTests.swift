@@ -16,7 +16,6 @@ final class DiscardOutputTests: XCTestCase {
         }
         .discardOutput()
         .map { XCTAssert(true) }
-        .result
-        .get()
+        .execute()
     }
 }

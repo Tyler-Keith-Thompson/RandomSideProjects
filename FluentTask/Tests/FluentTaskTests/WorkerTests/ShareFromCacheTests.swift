@@ -28,7 +28,7 @@ final class ShareFromCacheTests: XCTestCase {
         }
         
         let uow = unitOfWork()
-        async let d1 = uow.result.get()
+        async let d1 = uow.execute()
         XCTAssertFalse(cache.cache.isEmpty)
         async let d2 = DeferredTask { }
             .delay(for: .milliseconds(5))
@@ -40,8 +40,7 @@ final class ShareFromCacheTests: XCTestCase {
                 XCTAssertEqual(o1, o2)
                 return uow
             }
-            .result
-            .get()
+            .execute()
         
         _ = try await d1
         _ = try await d2
@@ -68,7 +67,7 @@ final class ShareFromCacheTests: XCTestCase {
         }
         
         let uow = unitOfWork()
-        async let d1 = uow.result.get()
+        async let d1 = uow.execute()
         XCTAssertFalse(cache.cache.isEmpty)
         async let d2 = DeferredTask { }
             .delay(for: .milliseconds(15))
@@ -76,8 +75,7 @@ final class ShareFromCacheTests: XCTestCase {
                 XCTAssert(cache.cache.isEmpty)
                 return unitOfWork()
             }
-            .result
-            .get()
+            .execute()
         
         _ = try await d1
         _ = try await d2
@@ -104,13 +102,12 @@ final class ShareFromCacheTests: XCTestCase {
         }
         
         let uow = unitOfWork()
-        async let d1 = uow.result.get()
+        async let d1 = uow.execute()
         XCTAssertFalse(cache.cache.isEmpty)
         async let d2 = DeferredTask { }
             .delay(for: .milliseconds(5))
             .flatMap { unitOfWork() }
-            .result
-            .get()
+            .execute()
         
         _ = try await d1
         _ = try await d2

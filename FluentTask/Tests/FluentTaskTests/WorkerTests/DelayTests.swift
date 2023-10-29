@@ -16,7 +16,7 @@ final class DelayTests: XCTestCase {
         try DeferredTask { }
             .delay(for: .milliseconds(10))
             .map { _ in exp.fulfill() }
-            .execute()
+            .run()
 
         self.wait(for: [exp], timeout: 0.02)
         XCTAssert(Date().timeIntervalSince(date) > Measurement<UnitDuration>(value: 10, unit: .milliseconds).converted(to: .seconds).value)

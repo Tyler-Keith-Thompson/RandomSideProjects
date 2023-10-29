@@ -28,9 +28,9 @@ final class ShareTests: XCTestCase {
             exp.fulfill()
         }
         
-        try t.execute()
-        try t.execute()
-        try t.execute()
+        try t.run()
+        try t.run()
+        try t.run()
 
         await fulfillment(of: [exp], timeout: 0.001)
         let copy = await test.arr
@@ -51,9 +51,9 @@ final class ShareTests: XCTestCase {
             await test.append("called")
         }
         
-        _ = try await t.result
-        _ = try await t.result
-        _ = try await t.result
+        try await t.execute()
+        try await t.execute()
+        try await t.execute()
         
         let copy = await test.arr
         XCTAssertEqual(copy, ["called", "called", "called"])
@@ -75,9 +75,9 @@ final class ShareTests: XCTestCase {
             exp.fulfill()
         }.share()
         
-        try t.execute()
-        try t.execute()
-        try t.execute()
+        try t.run()
+        try t.run()
+        try t.run()
 
         await fulfillment(of: [exp], timeout: 0.001)
         let copy = await test.arr
@@ -98,9 +98,9 @@ final class ShareTests: XCTestCase {
             await test.append("called")
         }.share()
         
-        _ = try await t.result
-        _ = try await t.result
-        _ = try await t.result
+        try await t.execute()
+        try await t.execute()
+        try await t.execute()
         
         let copy = await test.arr
         XCTAssertEqual(copy, ["called"])

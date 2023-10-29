@@ -20,7 +20,7 @@ final class AssertNoFailureTests: XCTestCase {
             }
             .assertNoFailure()
             .map { _ in exp.fulfill() }
-            .execute()
+            .run()
 
             self.wait(for: [exp], timeout: 0.001)
         }
@@ -33,7 +33,7 @@ final class AssertNoFailureTests: XCTestCase {
         }
         .assertNoFailure()
         .map { _ in exp.fulfill() }
-        .execute()
+        .run()
 
         self.wait(for: [exp], timeout: 0.001)
     }

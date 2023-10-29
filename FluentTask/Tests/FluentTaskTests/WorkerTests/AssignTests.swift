@@ -15,7 +15,7 @@ final class AssignTests: XCTestCase {
             var val = ""
         }
         
-        var test = Test()
+        let test = Test()
         
         try await DeferredTask { "test" }
             .assign(to: \.val, on: test)

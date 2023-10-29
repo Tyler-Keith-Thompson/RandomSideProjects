@@ -13,8 +13,7 @@ final class MapTests: XCTestCase {
     func testMapTransformsValue() async throws {
         let val = try await DeferredTask { 1 }
             .map { String(describing: $0) }
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, "1")
     }
@@ -27,8 +26,7 @@ final class MapTests: XCTestCase {
         
         let val = try await DeferredTask { Obj() }
             .map(\.val)
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, 0)
     }
@@ -36,8 +34,7 @@ final class MapTests: XCTestCase {
     func testTryMapTransformsValue() async throws {
         let val = try await DeferredTask { 1 }
             .tryMap { String(describing: $0) }
-            .result
-            .get()
+            .execute()
         
         XCTAssertEqual(val, "1")
     }
