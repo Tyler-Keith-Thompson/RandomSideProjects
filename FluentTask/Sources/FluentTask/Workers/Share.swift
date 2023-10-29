@@ -30,5 +30,8 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
+    /// Shares the upstream `AsynchronousUnitOfWork` among multiple downstream subscribers.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` that shares a single subscription to the upstream, allowing multiple downstream subscribers to receive the same values.
     public func share() -> some AsynchronousUnitOfWork<Success> & AnyActor { Workers.Share(upstream: self) }
 }

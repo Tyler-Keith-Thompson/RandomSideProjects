@@ -77,10 +77,25 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
+    /// Retries the upstream `AsynchronousUnitOfWork` up to a specified number of times while applying a transformation on error.
+    ///
+    /// - Parameters:
+    ///   - retries: The maximum number of times to retry the upstream, defaulting to 1.
+    ///   - transform: An async closure that takes the error from the upstream and returns a new `AsynchronousUnitOfWork`.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` that emits the same output as the upstream but retries on failure up to the specified number of times, with the applied transformation.
     public func retry<D: AsynchronousUnitOfWork>(_ retries: UInt = 1, @_inheritActorContext @_implicitSelfCapture _ transform: @escaping @Sendable (Error) async throws -> D) -> some AsynchronousUnitOfWork<Success> {
         Workers.RetryAfterFlatMapping(upstream: self, retries: retries, transform: transform)
     }
     
+    /// Retries the upstream `AsynchronousUnitOfWork` up to a specified number of times only when a specific error occurs, while applying a transformation on error.
+    ///
+    /// - Parameters:
+    ///   - retries: The maximum number of times to retry the upstream, defaulting to 1.
+    ///   - error: The specific error that should trigger a retry.
+    ///   - transform: An async closure that takes the error from the upstream and returns a new `AsynchronousUnitOfWork`.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` that emits the same output as the upstream but retries on the specified error up to the specified number of times, with the applied transformation.
     public func retry<D: AsynchronousUnitOfWork, E: Error & Equatable>(_ retries: UInt = 1, on error: E, @_inheritActorContext @_implicitSelfCapture _ transform: @escaping @Sendable (Error) async throws -> D) -> some AsynchronousUnitOfWork<Success> {
         Workers.RetryOnAfterFlatMapping(upstream: self, retries: retries, error: error, transform: transform)
     }

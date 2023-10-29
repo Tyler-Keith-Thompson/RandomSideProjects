@@ -27,6 +27,15 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
+    /// Decodes the output from the upstream `AsynchronousUnitOfWork` using the specified top-level decoder.
+    ///
+    /// - Parameters:
+    ///   - type: The type `T` to decode into, conforming to the `Decodable` protocol.
+    ///   - decoder: The top-level decoder `D` used for decoding the upstream data.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` whose output is the decoded `T` type object.
+    ///
+    /// - Note: The generic constraint `Success == D.Input` ensures that the upstream unit of work emits a compatible type for the decoder.
     public func decode<T: Decodable, D: TopLevelDecoder>(type: T.Type, decoder: D) -> some AsynchronousUnitOfWork<T> where Success == D.Input {
         Workers.Decode(upstream: self, decoder: decoder)
     }

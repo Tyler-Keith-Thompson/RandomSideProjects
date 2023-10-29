@@ -23,6 +23,11 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
+    /// Replaces any `nil` values from the upstream `AsynchronousUnitOfWork` with the provided non-nil value.
+    ///
+    /// - Parameter value: The value to emit when the upstream emits `nil`.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` that emits the specified value instead of `nil` when the upstream emits `nil`.
     public func replaceNil<S: Sendable>(with value: S) -> some AsynchronousUnitOfWork<S> where Success == S? {
         Workers.ReplaceNil<S>(upstream: self, newValue: value)
     }

@@ -27,6 +27,13 @@ extension Workers {
 }
 
 extension AsynchronousUnitOfWork {
+    /// Encodes the successful output values from the upstream `AsynchronousUnitOfWork` using the provided encoder.
+    ///
+    /// - Parameter encoder: The encoder to use for encoding the successful output values.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` emitting the encoded values as output of type `E.Output`.
+    ///
+    /// - Note: The returned `AsynchronousUnitOfWork` will fail if the encoding process fails.
     public func encode<E: TopLevelEncoder>(encoder: E) -> some AsynchronousUnitOfWork<E.Output> where Success: Encodable {
         Workers.Encode(upstream: self, encoder: encoder)
     }

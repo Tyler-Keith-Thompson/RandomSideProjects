@@ -8,6 +8,12 @@
 import Foundation
 
 extension AsynchronousUnitOfWork {
+    /// Logs events from the upstream `AsynchronousUnitOfWork` to the console.
+    ///
+    /// - Parameters:
+    ///   - prefix: A string to prefix each log message with. Default is an empty string.
+    ///
+    /// - Returns: An `AsynchronousUnitOfWork` that behaves identically to the upstream but logs events.
     public func print(_ prefix: String = "") -> some AsynchronousUnitOfWork<Success> {
         handleEvents {
             Swift.print("\(prefix) received output: \($0)")

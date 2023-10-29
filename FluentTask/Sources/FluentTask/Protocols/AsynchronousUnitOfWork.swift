@@ -1,14 +1,27 @@
 import Foundation
 import Atomics
 
+/// Represents an asynchronous unit of work.
+///
+/// - Parameters:
+///   - Success: The type of data the unit of work will produce if it succeeds.
+/// - NOTE: All units of work have the potential of throwing an error, because they can all be canceled
 public protocol AsynchronousUnitOfWork<Success>: Sendable where Success: Sendable {
+    /// The type of data the unit of work will produce if it succeeds.
     associatedtype Success
     
     var state: TaskState<Success> { get }
+    /// The result of the operation (will execute the task)
     var result: Result<Success, Error> { get async throws }
-    
+
+    /// Executes the task
     func run() throws
+    
+    /// Executes the task and waits for the result.
+    /// - Returns: The result of the task.
     @discardableResult func execute() async throws -> Success
+    
+    /// Cancel the task, even if it hasn't begun yet.
     func cancel()
 }
 
