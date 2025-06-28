@@ -1,0 +1,1 @@
+This is a proof of concept for using Swift as a scripting language. The idea is that you can build Swift scripts using web assembly, then read and execute them later. Kind of a plugin pattern sorta deal.
